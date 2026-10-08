@@ -1,0 +1,3302 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>노인일자리 참여자 관리도구</title>
+  <!-- Google Fonts & System Fallback: Slush Style Reference -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&family=Bowlby+One&display=swap" rel="stylesheet">
+  <!-- SheetJS for Excel Parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* ==========================================================================
+       DESIGN.md — Slush Design System CSS Custom Properties
+       ========================================================================== */
+    :root {
+      /* Colors */
+      --color-carbon: #000000;
+      --color-paper-white: #ffffff;
+      --color-sky-wash: #dceeff;
+      --color-concrete-gray: #cccccc;
+      --color-soft-mist: #e9e9e9;
+      --color-electric-blue: #4da2ff;
+      --color-mint-pop: #55db9c;
+      --color-lavender: #e9ccff;
+      --color-ember: #fb4903;
+      --color-sunburst: #ffd731;
+      --color-voltage-violet: #5c4ade;
+
+      /* Typography */
+      --font-display: 'Bowlby One', 'Pretendard', sans-serif;
+      --font-body: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+      /* Spacing Scale */
+      --spacing-4: 4px;
+      --spacing-8: 8px;
+      --spacing-12: 12px;
+      --spacing-16: 16px;
+      --spacing-20: 20px;
+      --spacing-24: 24px;
+      --spacing-32: 32px;
+      --spacing-48: 48px;
+
+      /* Border Radii */
+      --radius-cards: 24px;
+      --radius-cards-elevated: 32px;
+      --radius-buttons: 1600px;
+      --radius-pills: 1600px;
+      --radius-badges: 1600px;
+      --radius-inputs: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--color-sky-wash);
+      color: var(--color-carbon);
+      line-height: 1.5;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      padding-bottom: 60px;
+    }
+
+    /* Slush Marquee Strip */
+    .marquee-container {
+      background: var(--color-carbon);
+      color: var(--color-paper-white);
+      overflow: hidden;
+      white-space: nowrap;
+      padding: 8px 0;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      border-bottom: 1px solid var(--color-carbon);
+      display: flex;
+    }
+    .marquee-content {
+      display: inline-block;
+      animation: marquee 30s linear infinite;
+    }
+    @keyframes marquee {
+      0% { transform: translateX(0%); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* App Container */
+    .app-wrapper {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 24px 32px;
+    }
+
+    /* Privacy Banner */
+    .privacy-banner {
+      background: var(--color-sunburst);
+      border: 1px solid var(--color-carbon);
+      border-radius: 16px;
+      padding: 12px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .privacy-banner .banner-text {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .privacy-badge {
+      background: var(--color-carbon);
+      color: var(--color-paper-white);
+      padding: 3px 10px;
+      border-radius: var(--radius-badges);
+      font-size: 12px;
+    }
+
+    /* Header Nav */
+    header.slush-header {
+      background: var(--color-paper-white);
+      border: 1px solid var(--color-carbon);
+      border-radius: var(--radius-cards);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .brand-area {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .brand-logo-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 1600px;
+      border: 1px solid var(--color-carbon);
+      background: var(--color-electric-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--color-paper-white);
+      box-shadow: none;
+    }
+    .brand-titles h1 {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-titles p {
+      font-size: 13px;
+      color: #555555;
+      font-weight: 500;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* Slush Pill Select & Buttons */
+    .pill-select-wrapper {
+      position: relative;
+    }
+    .pill-select {
+      appearance: none;
+      background: var(--color-paper-white);
+      border: 1px solid var(--color-carbon);
+      border-radius: var(--radius-buttons);
+      padding: 10px 36px 10px 18px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      color: var(--color-carbon);
+    }
+    .pill-select-arrow {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      font-size: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 700;
+      border-radius: var(--radius-buttons);
+      cursor: pointer;
+      transition: transform 0.1s ease, background-color 0.15s ease;
+      text-decoration: none;
+      font-family: inherit;
+      border: 1px solid var(--color-carbon);
+      white-space: nowrap;
+    }
+    .btn:active {
+      transform: translateY(1px);
+    }
+    .btn-primary {
+      background: var(--color-carbon);
+      color: var(--color-paper-white);
+    }
+    .btn-primary:hover {
+      background: #222222;
+    }
+    .btn-ghost {
+      background: var(--color-paper-white);
+      color: var(--color-carbon);
+    }
+    .btn-ghost:hover {
+      background: var(--color-soft-mist);
+    }
+    .btn-mint {
+      background: var(--color-mint-pop);
+      color: var(--color-carbon);
+    }
+    .btn-lavender {
+      background: var(--color-lavender);
+      color: var(--color-carbon);
+    }
+    .btn-ember {
+      background: var(--color-ember);
+      color: var(--color-paper-white);
+    }
+    .btn-sm {
+      padding: 6px 14px;
+      font-size: 12px;
+    }
+
+    /* Sticker Stat Cards Bar */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      border: 1px solid var(--color-carbon);
+      border-radius: var(--radius-cards);
+      padding: 20px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .stat-card.c-sky { background: var(--color-paper-white); }
+    .stat-card.c-mint { background: var(--color-mint-pop); }
+    .stat-card.c-lavender { background: var(--color-lavender); }
+    .stat-card.c-sunburst { background: var(--color-sunburst); }
+    .stat-card.c-ember { background: #ffe6e0; border-color: var(--color-ember); border-width: 2px; }
+
+    .stat-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .stat-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #333333;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+    .stat-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 1600px;
+      border: 1px solid var(--color-carbon);
+      background: var(--color-paper-white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+    .stat-value {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+    .stat-sub {
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 6px;
+      color: #444444;
+    }
+
+    /* Main Navigation Tabs & Filters */
+    .nav-filter-section {
+      background: var(--color-paper-white);
+      border: 1px solid var(--color-carbon);
+      border-radius: var(--radius-cards);
+      padding: 18px 24px;
+      margin-bottom: 24px;
+    }
+    .top-tab-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--color-carbon);
+      padding-bottom: 14px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .tab-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .tab-pill {
+      background: var(--color-soft-mist);
+      border: 1px solid var(--color-carbon);
+      border-radius: var(--radius-buttons);
+      padding: 8px 18px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tab-pill.active {
+      background: var(--color-carbon);
+      color: var(--color-paper-white);
+    }
+    .tab-pill .count-badge {
+      background: var(--color-paper-white);
+      color: var(--color-carbon);
+      font-size: 11px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 1600px;
+      border: 1px solid var(--color-carbon);
+    }
+    .tab-pill.active .count-badge {
+      background: var(--color-electric-blue);
+      color: var(--color-paper-white);
+      border-color: var(--color-paper-white);
+    }
+
+    /* Business Program (사업단) Tabs */
+    .program-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .program-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .prog-label {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      margin-right: 4px;
+      color: #666;
+    }
+    .program-pill {
+      background: var(--color-paper-white);
+      border: 1px solid var(--color-carbon);
+      border-radius: var(--radius-buttons);
+      padding: 7px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      transition: all 0.15s ease;
+    }
+    .program-pill:hover {
+      transform: translateY(-1px);
+    }
+    .prog-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 1px solid var(--color-carbon);
+      display: inline-block;
+    }
+    .prog-dot.dot-all { background: var(--color-carbon); }
+    .prog-dot.dot-park { background: var(--color-mint-pop); }
+    .prog-dot.dot-community { background: var(--color-electric-blue); }
+    .prog-dot.dot-care { background: var(--color-lavender); }
+
+    /* Program-specific active styles */
+    .program-pill.active.pill-all {
+      background: var(--color-carbon);
+      color: var(--color-paper-white);
+    }
+    .program-pill.active.pill-park {
+      background: var(--color-mint-pop);
+      color: var(--color-carbon);
+    }
+    .program-pill.active.pill-community {
+      background: var(--color-electric-blue);
+      color: var(--color-paper-white);
+    }
+    .program-pill.active.pill-care {
+      background: var(--color-lavender);
+      color: var(--color-carbon);
+    }
+
+    .program-limit-tag {
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 1600px;
+      border: 1px solid var(--color-carbon);
+      background: var(--color-paper-white);
+      color: var(--color-carbon);
+      font-weight: 800;
+    }
+    .program-pill.active .program-limit-tag {
+      background: var(--color-paper-white);
+      color: var(--color-carbon);
+      border-color: var(--color-carbon);
+    }
+
+    /* Search & Filter Toolbar */
+    .toolbar-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px dashed #cccccc;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .search-box {
+      position: relative;
+      flex: 1;
+      max-width: 320px;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 8px 14px 8px 36px;
+      border: 1px solid var(--color-carbon);
+      border-radius: var(--radius-buttons);
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      background: var(--color-paper-white);
+    }
+    .search-box .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #777;
+    }
+    .status-filters {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .status-filter-btn {
+      padding: 6px 12px;
+      border-radius: var(--radius-buttons);
+      border: 1px solid var(--color-carbon);
+      font-size: 12px;
+      font-weight: 700;
+      background: var(--color-paper-white);
+      cursor: pointer;
+    }
+    .status-filter-btn.active {
+      background: var(--color-carbon);
+      color: var(--color-paper-white);
+    }
+
+    /* Content Panes */
+    .tab-pane {
+      display: none;
+    }
+    .tab-pane.active {
+      display: block;
+    }
+
+    /* Worksite Section & Participant Group */
+    .worksite-group-card {
+      background: var(--color-paper-white);
+      border: 1px solid var(--color-carbon);
+      border-radius: var(--radius-cards);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .worksite-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--color-carbon);
+      padding-bottom: 14px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .worksite-title-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .worksite-name {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+    .capacity-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: var(--radius-badges);
+      border: 1px solid var(--color-carbon);
+      font-size: 12px;
+      font-weight: 700;
+      background: var(--color-soft-mist);
+    }
+    .capacity-badge.shortage {
+      background: var(--color-sunburst);
+    }
+    .capacity-badge.full {
+      background: var(--color-mint-pop);
+    }
+    .worksite-demand-link {
+      font-size: 12px;
+      font-weight: 600;
+      color: #555;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--color-soft-mist);
+      padding: 4px 10px;
+      border-radius: var(--radius-badges);
+      border: 1px solid var(--color-carbon);
+    }
+
+    /* Participant Table */
+    .participant-table-wrapper {
+      overflow-x: auto;
+    }
+    table.slush-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 13px;
+    }
+    table.slush-table th {
+      background: var(--color-soft-mist);
+      padding: 10px 14px;
+      font-weight: 800;
+      text-align: left;
+      border-top: 1px solid var(--color-carbon);
+      border-bottom: 1px solid var(--color-carbon);
+      border-left: 1px solid var(--color-carbon);
+      font-size: 12px;
+      letter-spacing: 0.02em;
+    }
+    table.slush-table th:last-child {
+      border-right: 1px solid var(--color-carbon);
+    }
+    table.slush-table th:first-child {
+      border-top-left-radius: 12px;
+      border-bottom-left-radius: 12px;
+    }
+    table.slush-table th:last-child {
+      border-top-right-radius: 12px;
+      border-bottom-right-radius: 12px;
+    }
+    table.slush-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #e0e0e0;
+      vertical-align: middle;
+      font-weight: 500;
+    }
+    table.slush-table tr:hover td {
+      background-color: #f7faff;
+    }
+
+    /* Slush Status Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: var(--radius-badges);
+      border: 1px solid var(--color-carbon);
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .badge-participating {
+      background: var(--color-mint-pop);
+      color: var(--color-carbon);
+    }
+    .badge-suspended {
+      background: var(--color-lavender);
+      color: var(--color-carbon);
+    }
+    .badge-waiting {
+      background: var(--color-sunburst);
+      color: var(--color-carbon);
+    }
+    .badge-dropped {
+      background: var(--color-concrete-gray);
+      color: #333333;
+    }
+
+    /* Warning sticker badge */
+    .badge-alert {
+      background: var(--color-ember);
+      color: var(--color-paper-white);
+      animation: pulseAlert 1.8s infinite;
+    }
+    @keyframes pulseAlert {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.9; transform: scale(1.02); }
+    }
+
+    .suspension-progress-box {
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .progress-bar-track {
+      width: 110px;
+      height: 6px;
+      background: var(--color-soft-mist);
+      border: 1px solid var(--color-carbon);
+      border-radius: 1600px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--color-electric-blue);
+      border-radius: 1600px;
+    }
+    .progress-bar-fill.warning {
+      background: var(--color-ember);
+    }
+
+    /* Action Buttons inside Table */
+    .action-button-group {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    /* Waiting List (대기자) Section Special Treatment */
+    .waiting-section-card {
+      background: #fffdf5;
+      border: 2px dashed var(--color-sunburst);
+      border-radius: var(--radius-cards);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    /* Worksite & Demand Tab Cards */
+    .grid-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+    .slush-card {
+      background: var(--color-paper-white);
+      border: 1px solid var(--color-carbon);
+      border-radius: var(--radius-cards);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .slush-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .slush-card-title {
+      font-size: 17px;
+      font-weight: 800;
+    }
+    .slush-card-body {
+      font-size: 13px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 4px;
+      border-bottom: 1px dotted #e0e0e0;
+    }
+    .info-label {
+      font-weight: 600;
+      color: #666;
+    }
+    .info-val {
+      font-weight: 700;
+    }
+
+    /* Modal Styles (Slush System) */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(2px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 16px;
+    }
+    .modal-overlay.open {
+      display: flex;
+    }
+    .modal-card {
+      background: var(--color-paper-white);
+      border: 2px solid var(--color-carbon);
+      border-radius: var(--radius-cards-elevated);
+      max-width: 650px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 28px;
+      position: relative;
+    }
+    .modal-card.wide {
+      max-width: 850px;
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--color-carbon);
+      margin-bottom: 20px;
+    }
+    .modal-title {
+      font-size: 20px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .modal-close-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 1600px;
+      border: 1px solid var(--color-carbon);
+      background: var(--color-soft-mist);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 800;
+    }
+    .modal-close-btn:hover {
+      background: var(--color-carbon);
+      color: var(--color-paper-white);
+    }
+
+    /* Form Styles */
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--color-carbon);
+    }
+    .form-label .required {
+      color: var(--color-ember);
+      margin-left: 2px;
+    }
+    .form-control {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--color-carbon);
+      border-radius: var(--radius-inputs);
+      font-size: 14px;
+      font-family: inherit;
+      background: var(--color-paper-white);
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: var(--color-electric-blue);
+      box-shadow: 0 0 0 2px var(--color-sky-wash);
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .form-helper {
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
+    }
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    /* Suspension List In Modal */
+    .suspension-item-card {
+      background: #fdfdfd;
+      border: 1px solid var(--color-carbon);
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .suspension-item-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 13px;
+    }
+    .suspension-item-days {
+      font-weight: 800;
+      color: var(--color-voltage-violet);
+    }
+
+    /* Drag & Drop Excel Box */
+    .excel-drop-zone {
+      border: 2px dashed var(--color-carbon);
+      border-radius: var(--radius-cards);
+      background: var(--color-sky-wash);
+      padding: 36px 20px;
+      text-align: center;
+      cursor: pointer;
+      margin-bottom: 20px;
+      transition: background 0.15s ease;
+    }
+    .excel-drop-zone:hover, .excel-drop-zone.dragover {
+      background: #cce5ff;
+    }
+    .excel-drop-icon {
+      font-size: 40px;
+      margin-bottom: 8px;
+    }
+
+    /* Toast Notification */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .toast {
+      background: var(--color-carbon);
+      color: var(--color-paper-white);
+      padding: 12px 20px;
+      border-radius: var(--radius-buttons);
+      border: 1px solid var(--color-paper-white);
+      font-size: 14px;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: slideUp 0.2s ease forwards;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .app-wrapper { padding: 16px; }
+      header.slush-header { flex-direction: column; align-items: stretch; }
+      .header-controls { justify-content: flex-start; }
+      .form-row { grid-template-columns: 1fr; }
+      .worksite-header { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. Marquee Announcement Strip -->
+  <div class="marquee-container">
+    <div class="marquee-content">
+      📢 2026 노인일자리 및 사회활동지원사업 참여자 통합 관리 시스템 &nbsp;&nbsp;·&nbsp;&nbsp; 
+      노인복지관 전담 관리자용 웹 도구 &nbsp;&nbsp;·&nbsp;&nbsp; 
+      공원환경개선 (최대 45일) &nbsp;&nbsp;·&nbsp;&nbsp; 
+      지역사회환경개선 (최대 45일) &nbsp;&nbsp;·&nbsp;&nbsp; 
+      맞춤돌봄서비스 지원 (화면 약칭: 맞돌, 최대 30일) &nbsp;&nbsp;·&nbsp;&nbsp; 
+      주민등록번호 미수집 원칙 준수 (이름+생년월일 식별) &nbsp;&nbsp;·&nbsp;&nbsp; 
+      노트북 및 복지관 PC 데이터 백업/복원 지원 🚀 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      📢 2026 노인일자리 및 사회활동지원사업 참여자 통합 관리 시스템 &nbsp;&nbsp;·&nbsp;&nbsp; 
+      노인복지관 전담 관리자용 웹 도구 &nbsp;&nbsp;·&nbsp;&nbsp; 
+      공원환경개선 (최대 45일) &nbsp;&nbsp;·&nbsp;&nbsp; 
+      지역사회환경개선 (최대 45일) &nbsp;&nbsp;·&nbsp;&nbsp; 
+      맞춤돌봄서비스 지원 (화면 약칭: 맞돌, 최대 30일) &nbsp;&nbsp;·&nbsp;&nbsp; 
+    </div>
+  </div>
+
+  <div class="app-wrapper">
+
+    <!-- 2. Security & Privacy Notice Banner -->
+    <div class="privacy-banner">
+      <div class="banner-text">
+        <span class="privacy-badge">보안 및 개인정보 준수</span>
+        <span>본 시스템은 <strong>주민등록번호를 절대 수집하지 않으며</strong>, 현재 시연 및 테스트용 가상 데이터를 사용 중입니다. 복지관 업무망 및 외부 저장 기준 승인 후 실제 데이터를 운용하십시오.</span>
+      </div>
+      <button class="btn btn-sm btn-ghost" onclick="openModal('backupModal')">
+        <i data-lucide="shield-check" style="width:14px;height:14px;"></i> 데이터 보안 및 백업
+      </button>
+    </div>
+
+    <!-- 3. Slush Top Header -->
+    <header class="slush-header">
+      <div class="brand-area">
+        <div class="brand-logo-badge">S</div>
+        <div class="brand-titles">
+          <h1>노인일자리 참여자 관리도구 <span style="font-size:12px;font-weight:700;padding:2px 8px;background:var(--color-electric-blue);color:#fff;border-radius:1600px;border:1px solid #000;">v1.0</span></h1>
+          <p>공원환경개선 · 지역사회환경개선 · 맞춤돌봄(맞돌) 참여자 및 활동중지 통합 관리</p>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <!-- Year Selection -->
+        <div class="pill-select-wrapper">
+          <select id="yearSelect" class="pill-select" onchange="handleYearChange(this.value)">
+            <option value="2026" selected>2026년도</option>
+            <option value="2025">2025년도</option>
+            <option value="2024">2024년도</option>
+          </select>
+          <span class="pill-select-arrow">▼</span>
+        </div>
+
+        <!-- Action Buttons -->
+        <button class="btn btn-primary" onclick="openParticipantModal()">
+          <i data-lucide="user-plus" style="width:16px;height:16px;"></i> + 참여자 직접 등록
+        </button>
+        <button class="btn btn-ghost" onclick="openModal('excelModal')">
+          <i data-lucide="file-spreadsheet" style="width:16px;height:16px;"></i> 엑셀 일괄 등록
+        </button>
+        <button class="btn btn-ghost" onclick="openModal('backupModal')">
+          <i data-lucide="database" style="width:16px;height:16px;"></i> 백업/복원
+        </button>
+        <button class="btn btn-ghost btn-sm" onclick="resetToSampleData()" title="데이터 초기화 및 샘플 복구">
+          <i data-lucide="rotate-ccw" style="width:14px;height:14px;"></i> 초기화
+        </button>
+      </div>
+    </header>
+
+    <!-- 4. Stat Sticker Cards -->
+    <div class="stats-grid">
+      <div class="stat-card c-sky">
+        <div class="stat-top">
+          <span class="stat-label">현재 활동 참여자</span>
+          <div class="stat-icon">👥</div>
+        </div>
+        <div class="stat-value" id="statActiveCount">0명</div>
+        <div class="stat-sub" id="statActiveSub">선택 사업단 기준 활동 중</div>
+      </div>
+
+      <div class="stat-card c-lavender">
+        <div class="stat-top">
+          <span class="stat-label">활동중지 인원</span>
+          <div class="stat-icon">⏸️</div>
+        </div>
+        <div class="stat-value" id="statSuspendedCount">0명</div>
+        <div class="stat-sub">일시 중지</div>
+      </div>
+
+      <div class="stat-card c-ember" id="statOverdueCard">
+        <div class="stat-top">
+          <span class="stat-label" style="color:var(--color-ember);">🚨 확인 필요 (기간 임박)</span>
+          <div class="stat-icon" style="background:var(--color-ember);color:#fff;">⚠️</div>
+        </div>
+        <div class="stat-value" id="statOverdueCount" style="color:var(--color-ember);">0명</div>
+        <div class="stat-sub">종료 예정일 경과 및 복귀 임박자</div>
+      </div>
+
+      <div class="stat-card c-sunburst">
+        <div class="stat-top">
+          <span class="stat-label">대기자</span>
+          <div class="stat-icon">⏳</div>
+        </div>
+        <div class="stat-value" id="statWaitingCount">0명</div>
+        <div class="stat-sub">선발 대기 중</div>
+      </div>
+    </div>
+
+    <!-- 5. Navigation Tabs & Business Program Filter -->
+    <div class="nav-filter-section">
+      <div class="top-tab-row">
+        <div class="tab-pills">
+          <button class="tab-pill active" onclick="switchMainTab('participantsTab', this)">
+            <i data-lucide="users" style="width:16px;height:16px;"></i> 참여자 명단
+            <span class="count-badge" id="tabBadgeParticipants">0</span>
+          </button>
+          <button class="tab-pill" onclick="switchMainTab('worksitesTab', this)">
+            <i data-lucide="map-pin" style="width:16px;height:16px;"></i> 근무지 현황 (T.O)
+            <span class="count-badge" id="tabBadgeWorksites">0</span>
+          </button>
+          <button class="tab-pill" onclick="switchMainTab('demandsTab', this)">
+            <i data-lucide="building-2" style="width:16px;height:16px;"></i> 수요처 관리
+            <span class="count-badge" id="tabBadgeDemands">0</span>
+          </button>
+          <button class="tab-pill" onclick="switchMainTab('droppedTab', this)">
+            <i data-lucide="archive" style="width:16px;height:16px;"></i> 중도포기자 보관함
+            <span class="count-badge" id="tabBadgeDropped">0</span>
+          </button>
+        </div>
+
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-sm btn-ghost" onclick="openWorksiteModal()">
+            <i data-lucide="plus" style="width:14px;height:14px;"></i> 근무지 추가
+          </button>
+          <button class="btn btn-sm btn-ghost" onclick="openDemandModal()">
+            <i data-lucide="plus" style="width:14px;height:14px;"></i> 수요처 추가
+          </button>
+        </div>
+      </div>
+
+      <!-- Business Program (사업단) Tabs -->
+      <div class="program-bar">
+        <div class="program-pills">
+          <span class="prog-label">사업단:</span>
+          <button class="program-pill pill-all active" onclick="switchProgram('ALL', this)">
+            <span class="prog-dot dot-all"></span> 전체 사업단 보기
+          </button>
+          <button class="program-pill pill-park" onclick="switchProgram('공원환경개선', this)">
+            <span class="prog-dot dot-park"></span> 공원환경개선 <span class="program-limit-tag">중지 한도 45일</span>
+          </button>
+          <button class="program-pill pill-community" onclick="switchProgram('지역사회환경개선', this)">
+            <span class="prog-dot dot-community"></span> 지역사회환경개선 <span class="program-limit-tag">중지 한도 45일</span>
+          </button>
+          <button class="program-pill pill-care" onclick="switchProgram('맞춤돌봄서비스 지원', this)">
+            <span class="prog-dot dot-care"></span> 맞돌(맞춤돌봄) <span class="program-limit-tag">중지 한도 30일</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Search & Status Filter Toolbar (Active for Participant Tab) -->
+      <div class="toolbar-row" id="participantToolbar">
+        <div class="search-box">
+          <i data-lucide="search" class="search-icon" style="width:16px;height:16px;"></i>
+          <input type="text" id="participantSearchInput" placeholder="참여자 이름 검색..." oninput="handleParticipantSearch(this.value)">
+        </div>
+
+        <div class="status-filters">
+          <span style="font-size:12px;font-weight:700;color:#666;margin-right:4px;">상태 필터:</span>
+          <button class="status-filter-btn active" onclick="filterParticipantStatus('ALL', this)">전체</button>
+          <button class="status-filter-btn" onclick="filterParticipantStatus('참여', this)">참여 중</button>
+          <button class="status-filter-btn" onclick="filterParticipantStatus('활동중지', this)">활동중지</button>
+          <button class="status-filter-btn" onclick="filterParticipantStatus('대기', this)">대기자만</button>
+          <button class="status-filter-btn" onclick="filterParticipantStatus('확인필요', this)" style="border-color:var(--color-ember);color:var(--color-ember);">🚨 확인 필요 (기간 임박)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- =========================================================================
+         TAB 1: 참여자 명단 (첫 화면)
+         ========================================================================= -->
+    <div id="participantsTab" class="tab-pane active">
+      
+      <!-- 대기자 전용 박스 (근무지 없는 선발 전 신청자) -->
+      <div id="waitingListContainer" class="waiting-section-card" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;border-bottom:1px solid #e0c800;padding-bottom:8px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:16px;font-weight:800;color:#946c00;">⏳ 대기자 명단 (근무지 미지정)</span>
+            <span class="badge badge-waiting" id="waitingHeaderCount">0명</span>
+          </div>
+          <span style="font-size:12px;color:#775a00;font-weight:600;">※ 선발 완료 후 [참여 전환] 시 근무지와 활동 시작일을 배정합니다.</span>
+        </div>
+        <div class="participant-table-wrapper">
+          <table class="slush-table">
+            <thead>
+              <tr>
+                <th>사업단</th>
+                <th>이름</th>
+                <th>생년월일</th>
+                <th>등록 연도</th>
+                <th>상태</th>
+                <th>특이사항 및 메모</th>
+                <th style="text-align:right;">관리</th>
+              </tr>
+            </thead>
+            <tbody id="waitingListTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 근무지별 참여자 묶음 카드들 -->
+      <div id="worksiteGroupsContainer">
+        <!-- Dynamically rendered by renderWorksiteGroups() -->
+      </div>
+    </div>
+
+    <!-- =========================================================================
+         TAB 2: 근무지 현황 (T.O 관리)
+         ========================================================================= -->
+    <div id="worksitesTab" class="tab-pane">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h2 style="font-size:18px;font-weight:800;">근무지별 정원(희망 인원) 및 배치 현황</h2>
+        <button class="btn btn-primary btn-sm" onclick="openWorksiteModal()">
+          <i data-lucide="plus" style="width:14px;height:14px;"></i> 새 근무지 등록
+        </button>
+      </div>
+      <div class="grid-cards" id="worksitesGridContainer">
+        <!-- Dynamically populated -->
+      </div>
+    </div>
+
+    <!-- =========================================================================
+         TAB 3: 수요처 관리
+         ========================================================================= -->
+    <div id="demandsTab" class="tab-pane">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h2 style="font-size:18px;font-weight:800;">수요처 상세 정보 및 모니터링 연락망</h2>
+        <button class="btn btn-primary btn-sm" onclick="openDemandModal()">
+          <i data-lucide="plus" style="width:14px;height:14px;"></i> 새 수요처 등록
+        </button>
+      </div>
+      <div class="grid-cards" id="demandsGridContainer">
+        <!-- Dynamically populated -->
+      </div>
+    </div>
+
+    <!-- =========================================================================
+         TAB 4: 중도포기자 보관함
+         ========================================================================= -->
+    <div id="droppedTab" class="tab-pane">
+      <div class="worksite-group-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;border-bottom:1px solid #000;padding-bottom:12px;">
+          <div>
+            <h2 style="font-size:18px;font-weight:800;">중도포기자 영구 보관 기록부</h2>
+            <p style="font-size:13px;color:#666;">해당 연도 내 중도포기자의 기록을 보존하며, 사유 및 중도포기일자를 열람할 수 있습니다.</p>
+          </div>
+          <span class="badge badge-dropped" id="droppedHeaderCount">0명</span>
+        </div>
+
+        <div class="participant-table-wrapper">
+          <table class="slush-table">
+            <thead>
+              <tr>
+                <th>사업단</th>
+                <th>이름</th>
+                <th>생년월일</th>
+                <th>최종 근무지</th>
+                <th>활동 시작일</th>
+                <th>중도포기일</th>
+                <th>포기 사유</th>
+                <th>특이사항</th>
+                <th style="text-align:right;">상세 기록</th>
+              </tr>
+            </thead>
+            <tbody id="droppedTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div> <!-- End App Wrapper -->
+
+  <!-- =========================================================================
+       MODAL 1: 참여자 등록 / 수정 모달
+       ========================================================================= -->
+  <div class="modal-overlay" id="participantModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="participantModalTitle">
+          <i data-lucide="user-check"></i> 참여자 정보 입력
+        </h3>
+        <button class="modal-close-btn" onclick="closeModal('participantModal')">×</button>
+      </div>
+      <form id="participantForm" onsubmit="handleParticipantFormSubmit(event)">
+        <input type="hidden" id="pFormId">
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">연도 <span class="required">*</span></label>
+            <input type="number" id="pFormYear" class="form-control" required readonly>
+          </div>
+          <div class="form-group">
+            <label class="form-label">사업단 <span class="required">*</span></label>
+            <select id="pFormProgram" class="form-control" required onchange="onProgramChangeInForm()">
+              <option value="공원환경개선">공원환경개선 (최대 45일)</option>
+              <option value="지역사회환경개선">지역사회환경개선 (최대 45일)</option>
+              <option value="맞춤돌봄서비스 지원">맞춤돌봄서비스 지원 [맞돌] (최대 30일)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">이름 <span class="required">*</span></label>
+            <input type="text" id="pFormName" class="form-control" placeholder="홍길동" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">생년월일 (YYYY-MM-DD) <span class="required">*</span></label>
+            <input type="date" id="pFormBirth" class="form-control" required>
+            <div class="form-helper">주민번호 대신 이름과 생년월일로 식별합니다.</div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">상태 <span class="required">*</span></label>
+            <select id="pFormStatus" class="form-control" required onchange="onStatusChangeInForm(this.value)">
+              <option value="대기">대기 (선발 전)</option>
+              <option value="참여" selected>참여</option>
+              <option value="활동중지">활동중지</option>
+              <option value="중도포기">중도포기</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" id="pFormWorksiteLabel">배치 근무지</label>
+            <select id="pFormWorksite" class="form-control">
+              <!-- Dynamically populated -->
+            </select>
+            <div class="form-helper" id="pFormWorksiteHelper">대기자는 근무지 미지정이 가능합니다.</div>
+          </div>
+        </div>
+
+        <div class="form-row" id="pFormDateRow">
+          <div class="form-group">
+            <label class="form-label">활동 시작일</label>
+            <input type="date" id="pFormStartDate" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">활동 종료 예정일</label>
+            <input type="date" id="pFormEndDate" class="form-control" value="2026-12-31">
+            <div class="form-helper">기본값은 해당 연도 12월 31일입니다.</div>
+          </div>
+        </div>
+
+        <div class="form-group" id="pFormDropRow" style="display:none;background:#fdf2f0;padding:12px;border:1px solid var(--color-ember);border-radius:12px;">
+          <div class="form-row">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">중도포기일 <span class="required">*</span></label>
+              <input type="date" id="pFormDropDate" class="form-control">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">포기 사유 <span class="required">*</span></label>
+              <input type="text" id="pFormDropReason" class="form-control" placeholder="예: 건강 악화, 타 지역 이사">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">특이사항 (근무지 변경 내역, 건강 상태 등)</label>
+          <textarea id="pFormNotes" class="form-control" rows="2" placeholder="근무지 이동 내역이나 주의사항을 적어주세요."></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" onclick="closeModal('participantModal')">취소</button>
+          <button type="submit" class="btn btn-primary">저장 완료</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL 2: 활동중지 관리 모달 (핵심 업무 규칙 & 일수 계산)
+       ========================================================================= -->
+  <div class="modal-overlay" id="suspensionModal">
+    <div class="modal-card wide">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title">
+            <i data-lucide="clock"></i> 활동중지 내역 및 일수 계산
+          </h3>
+          <p style="font-size:13px;color:#555;margin-top:2px;" id="suspendModalSubTitle">참여자: 홍길동 (공원환경개선)</p>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('suspensionModal')">×</button>
+      </div>
+
+      <!-- Limit Gauge & Summary -->
+      <div style="background:var(--color-sky-wash);border:1px solid var(--color-carbon);border-radius:16px;padding:16px;margin-bottom:20px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span style="font-weight:800;font-size:14px;" id="suspendGaugeTitle">연간 활동중지 한도: 45일</span>
+          <span style="font-weight:800;font-size:14px;" id="suspendGaugeValues">총 0회 / 사용 0일 / 잔여 45일</span>
+        </div>
+        <div class="progress-bar-track" style="width:100%;height:10px;">
+          <div class="progress-bar-fill" id="suspendModalProgress" style="width:0%;"></div>
+        </div>
+        <div id="suspendWarningBanner" style="display:none;margin-top:10px;background:var(--color-ember);color:#fff;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:700;">
+          ⚠️ 주의: 활동중지 총 사용 일수가 연간 기준 한도를 초과했습니다!
+        </div>
+      </div>
+
+      <!-- New Suspension Form -->
+      <div style="background:#fafafa;border:1px solid var(--color-carbon);border-radius:16px;padding:16px;margin-bottom:20px;">
+        <h4 style="font-size:14px;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+          <i data-lucide="plus-circle" style="width:16px;height:16px;"></i> 신규 활동중지 등록
+        </h4>
+        <form id="newSuspensionForm" onsubmit="handleNewSuspensionSubmit(event)">
+          <input type="hidden" id="suspendParticipantId">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">시작일 <span class="required">*</span></label>
+              <input type="date" id="suspendStartDate" class="form-control" required onchange="calculateNewSuspendDays()">
+            </div>
+            <div class="form-group">
+              <label class="form-label">종료 예정일 <span class="required">*</span></label>
+              <input type="date" id="suspendEndDate" class="form-control" required onchange="calculateNewSuspendDays()">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">사유 및 메모</label>
+              <input type="text" id="suspendReason" class="form-control" placeholder="예: 병원 입원 및 수술 치료">
+            </div>
+            <div class="form-group">
+              <label class="form-label">계산 일수 (양 끝일 포함)</label>
+              <div style="display:flex;align-items:center;height:42px;gap:10px;">
+                <span id="calculatedDaysDisplay" style="font-size:16px;font-weight:800;color:var(--color-voltage-violet);">0 일간</span>
+                <span style="font-size:12px;color:#666;">(주말·공휴일 포함)</span>
+              </div>
+            </div>
+          </div>
+          <div id="overlapWarningBanner" style="display:none;background:#ffebee;color:var(--color-ember);padding:6px 10px;border-radius:8px;font-size:12px;font-weight:700;margin-bottom:10px;">
+            ❌ 입력한 기간이 기존 활동중지 기간과 겹칩니다! 날짜를 다시 확인해주세요.
+          </div>
+          <div style="display:flex;justify-content:flex-end;">
+            <button type="submit" class="btn btn-primary btn-sm">
+              <i data-lucide="check" style="width:14px;height:14px;"></i> 활동중지 추가 저장
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- History List -->
+      <h4 style="font-size:14px;font-weight:800;margin-bottom:10px;">활동중지 등록 이력</h4>
+      <div id="suspensionHistoryList" style="max-height:220px;overflow-y:auto;">
+        <!-- Dynamically rendered -->
+      </div>
+
+      <div class="modal-footer" style="justify-content:space-between;align-items:center;">
+        <span style="font-size:12px;color:#666;">※ 종료 예정일이 지나도 자동으로 참여로 바뀌지 않으며, 실제 복귀 확인 후 전환합니다.</span>
+        <button type="button" class="btn btn-primary" onclick="closeModal('suspensionModal')">확인 닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL 3: 상태 변경 / 복귀 확인 모달 (PRD 상태 전환 규칙 엄격 준수)
+       ========================================================================= -->
+  <div class="modal-overlay" id="statusChangeModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i data-lucide="repeat"></i> 참여자 상태 변경
+        </h3>
+        <button class="modal-close-btn" onclick="closeModal('statusChangeModal')">×</button>
+      </div>
+      <form id="statusChangeForm" onsubmit="handleStatusChangeSubmit(event)">
+        <input type="hidden" id="statusChangePId">
+
+        <div style="background:#f4f6fa;padding:12px;border-radius:12px;margin-bottom:16px;border:1px solid #ddd;">
+          <div style="font-size:14px;font-weight:800;" id="statusChangePName">홍길동</div>
+          <div style="font-size:12px;color:#555;" id="statusChangePCurrent">현재 상태: 대기</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">변경할 상태 <span class="required">*</span></label>
+          <select id="statusChangeSelect" class="form-control" onchange="onStatusModalSelectChange(this.value)">
+            <!-- Options dynamically built depending on current status -->
+          </select>
+        </div>
+
+        <!-- Conditional Field: 대기 -> 참여 시 근무지 & 시작일 필수 -->
+        <div id="statusChangeToParticipateFields" style="display:none;background:#f0fff4;border:1px solid var(--color-mint-pop);padding:14px;border-radius:12px;margin-bottom:16px;">
+          <div class="form-group">
+            <label class="form-label">배치할 근무지 <span class="required">*</span></label>
+            <select id="statusChangeWorksiteSelect" class="form-control">
+              <!-- Dynamically populated -->
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">활동 시작일 <span class="required">*</span></label>
+            <input type="date" id="statusChangeStartDate" class="form-control">
+          </div>
+        </div>
+
+        <!-- Conditional Field: 활동중지 -> 참여 복귀 시 실제 복귀일 확인 -->
+        <div id="statusChangeReturnFields" style="display:none;background:#eef6ff;border:1px solid var(--color-electric-blue);padding:14px;border-radius:12px;margin-bottom:16px;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">실제 복귀 일자 <span class="required">*</span></label>
+            <input type="date" id="statusChangeReturnDate" class="form-control">
+            <div class="form-helper">예정일과 다를 경우 마지막 활동중지 종료일이 이 날짜 전날로 자동 조정됩니다.</div>
+          </div>
+        </div>
+
+        <!-- Conditional Field: 참여/활동중지 -> 중도포기 시 날짜 및 사유 필수 -->
+        <div id="statusChangeDropFields" style="display:none;background:#fff5f5;border:1px solid var(--color-ember);padding:14px;border-radius:12px;margin-bottom:16px;">
+          <div class="form-group">
+            <label class="form-label">실제 중도포기일 <span class="required">*</span></label>
+            <input type="date" id="statusChangeDropDate" class="form-control">
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">중도포기 사유 <span class="required">*</span></label>
+            <input type="text" id="statusChangeDropReason" class="form-control" placeholder="예: 병원 입원, 거주지 이전, 개인 사유">
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" onclick="closeModal('statusChangeModal')">취소</button>
+          <button type="submit" class="btn btn-primary">상태 변경 적용</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL 4: 근무지 등록 / 수정 모달
+       ========================================================================= -->
+  <div class="modal-overlay" id="worksiteModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="worksiteModalTitle">
+          <i data-lucide="map-pin"></i> 근무지 등록 및 정원 설정
+        </h3>
+        <button class="modal-close-btn" onclick="closeModal('worksiteModal')">×</button>
+      </div>
+      <form id="worksiteForm" onsubmit="handleWorksiteFormSubmit(event)">
+        <input type="hidden" id="wsFormId">
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">연도 <span class="required">*</span></label>
+            <input type="number" id="wsFormYear" class="form-control" readonly required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">사업단 <span class="required">*</span></label>
+            <select id="wsFormProgram" class="form-control" required>
+              <option value="공원환경개선">공원환경개선</option>
+              <option value="지역사회환경개선">지역사회환경개선</option>
+              <option value="맞춤돌봄서비스 지원">맞춤돌봄서비스 지원</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">근무지 명칭 <span class="required">*</span></label>
+          <input type="text" id="wsFormName" class="form-control" placeholder="예: 중앙근린공원 B구역" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">희망 인원 (T.O / 정원) <span class="required">*</span></label>
+            <input type="number" id="wsFormCapacity" class="form-control" min="1" max="99" value="4" required>
+            <div class="form-helper">이 근무지에 필요한 목표 인원수입니다.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">연결 수요처 (선택)</label>
+            <select id="wsFormDemand" class="form-control">
+              <!-- Dynamically populated -->
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" onclick="closeModal('worksiteModal')">취소</button>
+          <button type="submit" class="btn btn-primary">저장 완료</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL 5: 수요처 등록 / 수정 모달
+       ========================================================================= -->
+  <div class="modal-overlay" id="demandModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="demandModalTitle">
+          <i data-lucide="building"></i> 수요처 정보 등록
+        </h3>
+        <button class="modal-close-btn" onclick="closeModal('demandModal')">×</button>
+      </div>
+      <form id="demandForm" onsubmit="handleDemandFormSubmit(event)">
+        <input type="hidden" id="dmFormId">
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">연도 <span class="required">*</span></label>
+            <input type="number" id="dmFormYear" class="form-control" readonly required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">사업단 구분 <span class="required">*</span></label>
+            <select id="dmFormProgram" class="form-control" required>
+              <option value="공원환경개선">공원환경개선</option>
+              <option value="지역사회환경개선">지역사회환경개선</option>
+              <option value="맞춤돌봄서비스 지원">맞춤돌봄서비스 지원 [맞돌]</option>
+              <option value="공통">공통 / 전 사업단</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">수요처 명칭 <span class="required">*</span></label>
+          <input type="text" id="dmFormName" class="form-control" placeholder="예: 한마음시니어복지센터" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">관리 면적 (수치+단위)</label>
+            <input type="text" id="dmFormArea" class="form-control" placeholder="예: 250㎡ 또는 1,200평">
+          </div>
+          <div class="form-group">
+            <label class="form-label">주소</label>
+            <input type="text" id="dmFormAddress" class="form-control" placeholder="예: 서울시 종로구 대학로 12">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">수요처 담당자명</label>
+            <input type="text" id="dmFormManager" class="form-control" placeholder="김복지 팀장">
+          </div>
+          <div class="form-group">
+            <label class="form-label">담당자 휴무일</label>
+            <input type="text" id="dmFormHoliday" class="form-control" placeholder="매주 월요일 / 공휴일">
+            <div class="form-helper">모니터링 일정 참고용입니다.</div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">전화번호</label>
+            <input type="text" id="dmFormPhone" class="form-control" placeholder="02-1234-5678">
+          </div>
+          <div class="form-group">
+            <label class="form-label">이메일</label>
+            <input type="email" id="dmFormEmail" class="form-control" placeholder="contact@center.or.kr">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">업무 및 모니터링 메모</label>
+          <textarea id="dmFormNotes" class="form-control" rows="2" placeholder="출입 시 주의사항, 도구 보관함 위치 등"></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" onclick="closeModal('demandModal')">취소</button>
+          <button type="submit" class="btn btn-primary">저장 완료</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL 6: 엑셀(.xlsx) 일괄 가져오기 모달 (PRD 4.6 준수)
+       ========================================================================= -->
+  <div class="modal-overlay" id="excelModal">
+    <div class="modal-card wide">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i data-lucide="sheet"></i> 엑셀 참여자 일괄 가져오기
+        </h3>
+        <button class="modal-close-btn" onclick="closeModal('excelModal')">×</button>
+      </div>
+
+      <!-- File Drop Zone -->
+      <div class="excel-drop-zone" id="excelDropZone" onclick="document.getElementById('excelFileInput').click()">
+        <div class="excel-drop-icon">📊</div>
+        <p style="font-size:15px;font-weight:800;margin-bottom:4px;">참여자 엑셀 파일(.xlsx)을 드래그하거나 클릭하여 선택하세요</p>
+        <p style="font-size:12px;color:#666;">첫 행의 헤더(이름, 생년월일, 사업단, 상태, 근무지, 시작일 등)를 자동으로 감지합니다.</p>
+        <input type="file" id="excelFileInput" accept=".xlsx, .xls" style="display:none;" onchange="handleExcelFileSelect(this.files)">
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <span style="font-size:13px;font-weight:700;">※ 주민등록번호 열이 포함되어 있다면 자동으로 제외됩니다.</span>
+        <button class="btn btn-ghost btn-sm" onclick="downloadSampleExcel()">
+          <i data-lucide="download" style="width:14px;height:14px;"></i> 샘플 엑셀 서식 다운로드
+        </button>
+      </div>
+
+      <!-- Preview & Validation Area -->
+      <div id="excelPreviewSection" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <h4 style="font-size:14px;font-weight:800;" id="excelPreviewSummary">가져오기 데이터 미리보기 (총 0건)</h4>
+          <div style="display:flex;gap:6px;" id="excelValidationBadges">
+            <!-- Badges for Valid, Error, Duplicate -->
+          </div>
+        </div>
+
+        <div class="participant-table-wrapper" style="max-height:260px;overflow-y:auto;border:1px solid var(--color-carbon);border-radius:12px;">
+          <table class="slush-table">
+            <thead>
+              <tr>
+                <th>검증 상태</th>
+                <th>이름</th>
+                <th>생년월일</th>
+                <th>사업단</th>
+                <th>상태</th>
+                <th>근무지</th>
+                <th>시작일</th>
+                <th>비고/오류</th>
+              </tr>
+            </thead>
+            <tbody id="excelPreviewTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="modal-footer" style="margin-top:16px;">
+          <button type="button" class="btn btn-ghost" onclick="closeModal('excelModal')">취소</button>
+          <button type="button" class="btn btn-primary" id="btnExecuteExcelImport" onclick="executeExcelImport()">
+            정상 데이터 일괄 등록하기
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL 7: 데이터 백업 및 복원 모달
+       ========================================================================= -->
+  <div class="modal-overlay" id="backupModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i data-lucide="hard-drive"></i> 데이터 백업 및 PC 간 동기화
+        </h3>
+        <button class="modal-close-btn" onclick="closeModal('backupModal')">×</button>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div style="background:#f4f6fa;padding:16px;border:1px solid var(--color-carbon);border-radius:16px;">
+          <h4 style="font-size:15px;font-weight:800;margin-bottom:6px;">💾 파일로 백업하기 (노트북/복지관 PC 이동용)</h4>
+          <p style="font-size:13px;color:#555;margin-bottom:12px;">현재 브라우저에 저장된 참여자, 근무지, 활동중지, 수요처 전체 데이터를 JSON 파일로 다운로드합니다.</p>
+          <button class="btn btn-primary btn-sm" onclick="exportDataToJson()">
+            <i data-lucide="download" style="width:14px;height:14px;"></i> 전체 데이터 백업 파일(.json) 내보내기
+          </button>
+        </div>
+
+        <div style="background:#f4f6fa;padding:16px;border:1px solid var(--color-carbon);border-radius:16px;">
+          <h4 style="font-size:15px;font-weight:800;margin-bottom:6px;">📥 백업 파일 불러오기 (데이터 복원)</h4>
+          <p style="font-size:13px;color:#555;margin-bottom:12px;">다른 PC에서 내려받은 백업 파일(.json)을 업로드하여 데이터를 덮어씁니다.</p>
+          <input type="file" id="jsonFileInput" accept=".json" style="display:none;" onchange="importDataFromJson(this.files)">
+          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('jsonFileInput').click()">
+            <i data-lucide="upload" style="width:14px;height:14px;"></i> 백업 파일 선택하여 복원하기
+          </button>
+        </div>
+
+        <div style="border-left:4px solid var(--color-ember);padding-left:12px;font-size:12px;color:#666;">
+          <strong>기관 보안 확인 사항:</strong> 본 시스템은 로컬 브라우저 저장소(LocalStorage)를 사용하여 외부 서버로 정보를 무단 전송하지 않습니다. 복지관 업무망 또는 내부 보안 규정에 따라 주기적으로 백업 파일을 보관하시기 바랍니다.
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="closeModal('backupModal')">확인 완료</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- =========================================================================
+       JAVASCRIPT APPLICATION LOGIC
+       ========================================================================= -->
+  <script>
+    /* -------------------------------------------------------------------------
+       1. DATA STRUCTURES & LOCALSTORAGE REPOSITORY
+       ------------------------------------------------------------------------- */
+    const STORAGE_KEY = "SENIOR_JOB_TOOL_DATA_V1";
+
+    // 기준 상한일수 (PRD 4.3)
+    const SUSPENSION_LIMITS = {
+      "공원환경개선": 45,
+      "지역사회환경개선": 45,
+      "맞춤돌봄서비스 지원": 30
+    };
+
+    // Global State
+    let AppData = {
+      participants: [],
+      suspensions: [],
+      worksites: [],
+      demands: []
+    };
+
+    let CurrentYear = "2026";
+    let CurrentProgram = "ALL";
+    let CurrentMainTab = "participantsTab";
+    let CurrentSearchQuery = "";
+    let CurrentStatusFilter = "ALL";
+
+    // Temporary storage for excel import
+    let ExcelParsedCandidates = [];
+
+    /* -------------------------------------------------------------------------
+       2. INITIALIZATION & SAMPLE DATA SEEDING
+       ------------------------------------------------------------------------- */
+    window.addEventListener("DOMContentLoaded", () => {
+      loadData();
+      renderAll();
+      lucide.createIcons();
+      setupDragAndDrop();
+    });
+
+    function loadData() {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        try {
+          AppData = JSON.parse(stored);
+          // 수요처 program 필드 마이그레이션 (기존 데이터 호환)
+          if (AppData.demands) {
+            let migrated = false;
+            AppData.demands.forEach(d => {
+              if (!d.program) {
+                const ws = AppData.worksites.find(w => w.demandId === d.id);
+                if (ws && ws.program) {
+                  d.program = ws.program;
+                } else if (d.name.includes("공원")) {
+                  d.program = "공원환경개선";
+                } else if (d.name.includes("돌봄") || d.name.includes("맞돌")) {
+                  d.program = "맞춤돌봄서비스 지원";
+                } else if (d.name.includes("주민센터") || d.name.includes("환경")) {
+                  d.program = "지역사회환경개선";
+                } else {
+                  d.program = "공원환경개선";
+                }
+                migrated = true;
+              }
+            });
+            if (migrated) saveData();
+          }
+        } catch (e) {
+          console.error("Failed to parse stored data", e);
+          initSampleData();
+        }
+      } else {
+        initSampleData();
+      }
+    }
+
+    function saveData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(AppData));
+    }
+
+    function resetToSampleData() {
+      if (confirm("모든 데이터를 초기화하고 2026년도 기본 가상 예시 데이터로 복원하시겠습니까?")) {
+        initSampleData();
+        renderAll();
+        showToast("가상 예시 데이터로 초기화되었습니다.");
+      }
+    }
+
+    function initSampleData() {
+      AppData = {
+        demands: [
+          { id: "dm-1", year: "2026", program: "공원환경개선", name: "종로구 푸른녹지과 (탑골공원 관리소)", area: "4,200㎡", address: "서울 종로구 종로 99", manager: "박공원 주무관", holiday: "연중무휴", phone: "02-2148-1234", email: "park@jongno.go.kr", notes: "공원 내 벤치 소독 및 산책로 낙엽 청소 요청" },
+          { id: "dm-2", year: "2026", program: "맞춤돌봄서비스 지원", name: "종로노인종합복지관 맞춤돌봄센터", area: "180㎡", address: "서울 종로구 율곡로 19길 17", manager: "최돌봄 복지사", holiday: "매주 토, 일요일", phone: "02-742-9999", email: "care@jongnocare.or.kr", notes: "취약어르신 안부확인 동행 및 도시락 배달 보조" },
+          { id: "dm-3", year: "2026", program: "지역사회환경개선", name: "혜화동 주민센터 청소행정팀", area: "850㎡", address: "서울 종로구 혜화로 12", manager: "이주민 계장", holiday: "공휴일 휴무", phone: "02-2148-5500", email: "lee@jongno.go.kr", notes: "이면도로 및 쓰레기 상습투기지역 정화활동" },
+          { id: "dm-4", year: "2026", program: "공원환경개선", name: "마로니에공원 예술문화관리소", area: "2,500㎡", address: "서울 종로구 대학로 104", manager: "정문화 대리", holiday: "매주 월요일", phone: "02-760-4800", email: "culture@marronnier.or.kr", notes: "야외공연장 주변 환경 정비 및 화단 가꾸기" }
+        ],
+        worksites: [
+          { id: "ws-1", year: "2026", program: "공원환경개선", name: "탑골공원 1구역 (정문~사리탑)", capacity: 4, demandId: "dm-1" },
+          { id: "ws-2", year: "2026", program: "공원환경개선", name: "마로니에공원 야외광장", capacity: 3, demandId: "dm-4" },
+          { id: "ws-3", year: "2026", program: "지역사회환경개선", name: "혜화동 대학로 거리환경정비", capacity: 4, demandId: "dm-3" },
+          { id: "ws-4", year: "2026", program: "지역사회환경개선", name: "동숭동 주택가 이면도로정비", capacity: 3, demandId: "dm-3" },
+          { id: "ws-5", year: "2026", program: "맞춤돌봄서비스 지원", name: "종로맞춤돌봄 1팀 (혜화/이화)", capacity: 3, demandId: "dm-2" },
+          { id: "ws-6", year: "2026", program: "맞춤돌봄서비스 지원", name: "종로맞춤돌봄 2팀 (명륜/가회)", capacity: 2, demandId: "dm-2" }
+        ],
+        participants: [
+          // 공원환경개선 참여자들
+          { id: "p-101", year: "2026", program: "공원환경개선", name: "김영수", birth: "1948-03-12", status: "참여", worksiteId: "ws-1", startDate: "2026-01-02", endDate: "2026-12-31", dropDate: "", dropReason: "", notes: "오전 조 반장님, 근태 성실하심" },
+          { id: "p-102", year: "2026", program: "공원환경개선", name: "박정자", birth: "1951-07-25", status: "참여", worksiteId: "ws-1", startDate: "2026-01-02", endDate: "2026-12-31", dropDate: "", dropReason: "", notes: "허리 통증으로 가벼운 정비 위주 배치" },
+          { id: "p-103", year: "2026", program: "공원환경개선", name: "이순신", birth: "1949-11-05", status: "활동중지", worksiteId: "ws-1", startDate: "2026-01-02", endDate: "2026-12-31", dropDate: "", dropReason: "", notes: "낙상으로 인한 입원 치료 (복귀 예정일 초과 경고 예시)" },
+          { id: "p-104", year: "2026", program: "공원환경개선", name: "정태호", birth: "1952-04-18", status: "참여", worksiteId: "ws-1", startDate: "2026-01-02", endDate: "2026-12-31", dropDate: "", dropReason: "", notes: "화단 정원 관리 경력 풍부" },
+          { id: "p-105", year: "2026", program: "공원환경개선", name: "강동원", birth: "1950-09-02", status: "참여", worksiteId: "ws-2", startDate: "2026-01-02", endDate: "2026-12-31", dropDate: "", dropReason: "", notes: "오후 조 담당" },
+          { id: "p-106", year: "2026", program: "공원환경개선", name: "윤미숙", birth: "1953-01-14", status: "참여", worksiteId: "ws-2", startDate: "2026-01-02", endDate: "2026-12-31", dropDate: "", dropReason: "", notes: "" },
+          
+          // 공원 대기자
+          { id: "p-107", year: "2026", program: "공원환경개선", name: "오세훈", birth: "1951-06-30", status: "대기", worksiteId: "", startDate: "", endDate: "2026-12-31", dropDate: "", dropReason: "", notes: "결원 발생 시 1순위 연락 요망" },
+
+          // 지역사회환경개선 참여자들
+          { id: "p-201", year: "2026", program: "지역사회환경개선", name: "조상철", birth: "1947-12-20", status: "참여", worksiteId: "ws-3", startDate: "2026-01-02", endDate: "2026-12-31", dropDate: "", dropReason: "", notes: "" },
+          { id: "p-202", year: "2026", program: "지역사회환경개선", name: "임복희", birth: "1952-08-11", status: "참여", worksiteId: "ws-3", startDate: "2026-01-02", endDate: "2026-12-31", dropDate: "", dropReason: "", notes: "" },
+          { id: "p-203", year: "2026", program: "지역사회환경개선", name: "한영수", birth: "1950-02-28", status: "활동중지", worksiteId: "ws-3", startDate: "2026-01-02", endDate: "2026-12-31", dropDate: "", dropReason: "", notes: "가족 간병으로 15일간 활동중지 신청" },
+          { id: "p-204", year: "2026", program: "지역사회환경개선", name: "문경자", birth: "1949-05-16", status: "참여", worksiteId: "ws-4", startDate: "2026-01-02", endDate: "2026-12-31", dropDate: "", dropReason: "", notes: "" },
+          { id: "p-205", year: "2026", program: "지역사회환경개선", name: "서재필", birth: "1951-10-10", status: "참여", worksiteId: "ws-4", startDate: "2026-01-02", endDate: "2026-12-31", dropDate: "", dropReason: "", notes: "" },
+
+          // 맞돌(맞춤돌봄서비스 지원) 참여자들
+          { id: "p-301", year: "2026", program: "맞춤돌봄서비스 지원", name: "고영희", birth: "1954-03-08", status: "참여", worksiteId: "ws-5", startDate: "2026-01-02", endDate: "2026-12-31", dropDate: "", dropReason: "", notes: "돌봄 경험 3년 차" },
+          { id: "p-302", year: "2026", program: "맞춤돌봄서비스 지원", name: "장광남", birth: "1952-11-23", status: "참여", worksiteId: "ws-5", startDate: "2026-01-02", endDate: "2026-12-31", dropDate: "", dropReason: "", notes: "차량 운전 보조 가능" },
+          { id: "p-303", year: "2026", program: "맞춤돌봄서비스 지원", name: "배정자", birth: "1955-01-07", status: "참여", worksiteId: "ws-6", startDate: "2026-01-02", endDate: "2026-12-31", dropDate: "", dropReason: "", notes: "" },
+          { id: "p-304", year: "2026", program: "맞춤돌봄서비스 지원", name: "송민수", birth: "1953-07-19", status: "대기", worksiteId: "", startDate: "", endDate: "2026-12-31", dropDate: "", dropReason: "", notes: "보육/복지 자격증 소지" },
+
+          // 중도포기자 예시 (기록 영구 보존)
+          { id: "p-401", year: "2026", program: "공원환경개선", name: "황인택", birth: "1946-04-05", status: "중도포기", worksiteId: "ws-1", startDate: "2026-01-02", endDate: "2026-12-31", dropDate: "2026-02-28", dropReason: "타 시·도로 자녀 동거 이사", notes: "2월 말까지 근무 후 중도포기 처리 완료" }
+        ],
+        suspensions: [
+          // 이순신 (종료일 2026-09-15로 과거 날짜 -> 미복귀 경고 발생 테스트)
+          { id: "sus-1", participantId: "p-103", startDate: "2026-09-01", endDate: "2026-09-15", days: 15, reason: "다리 염좌 치료 및 통원" },
+          // 한영수 (현재 진행 중 활동중지)
+          { id: "sus-2", participantId: "p-203", startDate: "2026-09-25", endDate: "2026-10-09", days: 15, reason: "배우자 간병" },
+          // 김영수 과거 활동중지 완료 이력
+          { id: "sus-3", participantId: "p-101", startDate: "2026-04-10", endDate: "2026-04-19", days: 10, reason: "백내장 수술 및 안정" }
+        ]
+      };
+      saveData();
+    }
+
+    /* -------------------------------------------------------------------------
+       3. UTILITY FUNCTIONS & DATE CALCULATIONS
+       ------------------------------------------------------------------------- */
+    // 시작일, 종료일 모두 포함 (inclusive), 일수 계산
+    function calculateInclusiveDays(startDateStr, endDateStr) {
+      if (!startDateStr || !endDateStr) return 0;
+      const start = new Date(startDateStr);
+      const end = new Date(endDateStr);
+      if (isNaN(start) || isNaN(end) || start > end) return 0;
+      const diffTime = end.getTime() - start.getTime();
+      return Math.round(diffTime / (1000 * 3600 * 24)) + 1;
+    }
+
+    // 오늘 날짜 문자열 (YYYY-MM-DD)
+    function getTodayString() {
+      const now = new Date();
+      return now.toISOString().split("T")[0];
+    }
+
+    // 복귀 예정일 초과 여부 확인 (활동중지 상태이면서 마지막 중지의 종료일이 오늘보다 이전)
+    function isSuspensionOverdue(participantId) {
+      const p = AppData.participants.find(x => x.id === participantId);
+      if (!p || p.status !== "활동중지") return false;
+      const list = AppData.suspensions.filter(s => s.participantId === participantId);
+      if (list.length === 0) return false;
+      list.sort((a, b) => new Date(b.endDate) - new Date(a.endDate));
+      const latestEnd = list[0].endDate;
+      const today = getTodayString();
+      return latestEnd < today;
+    }
+
+    // 참여자별 누적 활동중지 요약 통계
+    function getParticipantSuspensionSummary(participantId, programName) {
+      const maxLimit = SUSPENSION_LIMITS[programName] || 45;
+      const list = AppData.suspensions.filter(s => s.participantId === participantId);
+      const count = list.length;
+      const totalDays = list.reduce((sum, item) => sum + (item.days || 0), 0);
+      const remainingDays = Math.max(0, maxLimit - totalDays);
+      const isExceeded = totalDays > maxLimit;
+      return { count, totalDays, remainingDays, maxLimit, isExceeded, list };
+    }
+
+    // 고유 ID 생성기
+    function generateId(prefix = "id") {
+      return prefix + "-" + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+    }
+
+    // 사업단별 고유 시그니처 색상 배지 생성 함수
+    function getProgramBadgeHtml(programName) {
+      let bg = "var(--color-soft-mist)";
+      let color = "var(--color-carbon)";
+      let border = "var(--color-carbon)";
+
+      if (programName === "공원환경개선") {
+        bg = "var(--color-mint-pop)";
+        color = "var(--color-carbon)";
+      } else if (programName === "지역사회환경개선") {
+        bg = "var(--color-electric-blue)";
+        color = "#ffffff";
+      } else if (programName && (programName.includes("돌봄") || programName.includes("맞돌"))) {
+        bg = "var(--color-lavender)";
+        color = "var(--color-carbon)";
+      } else if (programName === "공통") {
+        bg = "var(--color-concrete-gray)";
+        color = "var(--color-carbon)";
+      }
+
+      return `<span class="badge" style="background:${bg};color:${color};border:1px solid ${border};font-weight:800;">${programName || '사업단 미지정'}</span>`;
+    }
+
+    /* -------------------------------------------------------------------------
+       4. UI RENDERING LOGIC
+       ------------------------------------------------------------------------- */
+    function renderAll() {
+      renderStatCards();
+      renderTabBadges();
+      renderParticipantTab();
+      renderWorksitesTab();
+      renderDemandsTab();
+      renderDroppedTab();
+      lucide.createIcons();
+    }
+
+    // 4.1 상단 스티커 통계 카드 렌더링
+    function renderStatCards() {
+      const yearParticipants = AppData.participants.filter(p => p.year === CurrentYear && (CurrentProgram === "ALL" || p.program === CurrentProgram));
+      
+      const activeCount = yearParticipants.filter(p => p.status === "참여").length;
+      const suspendedCount = yearParticipants.filter(p => p.status === "활동중지").length;
+      const waitingCount = yearParticipants.filter(p => p.status === "대기").length;
+      
+      let overdueCount = 0;
+      yearParticipants.forEach(p => {
+        if (isSuspensionOverdue(p.id)) overdueCount++;
+      });
+
+      document.getElementById("statActiveCount").innerText = `${activeCount}명`;
+      document.getElementById("statSuspendedCount").innerText = `${suspendedCount}명`;
+      document.getElementById("statOverdueCount").innerText = `${overdueCount}명`;
+      document.getElementById("statWaitingCount").innerText = `${waitingCount}명`;
+
+      const overdueCard = document.getElementById("statOverdueCard");
+      if (overdueCount > 0) {
+        overdueCard.style.display = "flex";
+      } else {
+        overdueCard.style.display = "flex";
+      }
+    }
+
+    // 4.2 탭 뱃지 카운트 렌더링
+    function renderTabBadges() {
+      const yearP = AppData.participants.filter(p => p.year === CurrentYear && (CurrentProgram === "ALL" || p.program === CurrentProgram));
+      const nonDropped = yearP.filter(p => p.status !== "중도포기");
+      const dropped = yearP.filter(p => p.status === "중도포기");
+      
+      const worksiteList = AppData.worksites.filter(w => w.year === CurrentYear && (CurrentProgram === "ALL" || w.program === CurrentProgram));
+      const demandList = AppData.demands.filter(d => d.year === CurrentYear && (CurrentProgram === "ALL" || d.program === CurrentProgram || d.program === "공통"));
+
+      document.getElementById("tabBadgeParticipants").innerText = nonDropped.length;
+      document.getElementById("tabBadgeWorksites").innerText = worksiteList.length;
+      document.getElementById("tabBadgeDemands").innerText = demandList.length;
+      document.getElementById("tabBadgeDropped").innerText = dropped.length;
+    }
+
+    // 4.3 참여자 탭 렌더링 (근무지별 그루핑 & 대기자 별도)
+    function renderParticipantTab() {
+      const worksiteContainer = document.getElementById("worksiteGroupsContainer");
+      const waitingContainer = document.getElementById("waitingListContainer");
+      const waitingTbody = document.getElementById("waitingListTableBody");
+
+      // 1. 참여자 필터링 (연도, 사업단, 검색어, 상태 필터)
+      let list = AppData.participants.filter(p => p.year === CurrentYear);
+      if (CurrentProgram !== "ALL") {
+        list = list.filter(p => p.program === CurrentProgram);
+      }
+      if (CurrentSearchQuery.trim() !== "") {
+        const q = CurrentSearchQuery.trim().toLowerCase();
+        list = list.filter(p => p.name.toLowerCase().includes(q) || p.birth.includes(q) || (p.notes && p.notes.toLowerCase().includes(q)));
+      }
+      if (CurrentStatusFilter !== "ALL") {
+        if (CurrentStatusFilter === "미복귀주의") {
+          list = list.filter(p => isSuspensionOverdue(p.id));
+        } else {
+          list = list.filter(p => p.status === CurrentStatusFilter);
+        }
+      }
+
+      // 대기자와 비대기자(근무지 배치자) 분리
+      const waitingList = list.filter(p => p.status === "대기");
+      const activeList = list.filter(p => p.status !== "대기" && p.status !== "중도포기");
+
+      // Render 대기자 섹션
+      if (waitingList.length > 0 || CurrentStatusFilter === "대기") {
+        waitingContainer.style.display = "block";
+        document.getElementById("waitingHeaderCount").innerText = `${waitingList.length}명`;
+        
+        let html = "";
+        if (waitingList.length === 0) {
+          html = `<tr><td colspan="7" style="text-align:center;color:#888;padding:20px;">조건에 일치하는 대기자가 없습니다.</td></tr>`;
+        } else {
+          waitingList.forEach(p => {
+            html += `
+              <tr>
+                <td>${getProgramBadgeHtml(p.program)}</td>
+                <td style="font-weight:800;font-size:14px;">${p.name}</td>
+                <td>${p.birth}</td>
+                <td>${p.year}년</td>
+                <td><span class="badge badge-waiting">대기</span></td>
+                <td>${p.notes || '<span style="color:#aaa;">-</span>'}</td>
+                <td style="text-align:right;">
+                  <button class="btn btn-sm btn-primary" onclick="openStatusChangeModal('${p.id}')">
+                    <i data-lucide="user-check" style="width:13px;height:13px;"></i> 참여 전환
+                  </button>
+                  <button class="btn btn-sm btn-ghost" onclick="openParticipantModal('${p.id}')">수정</button>
+                </td>
+              </tr>
+            `;
+          });
+        }
+        waitingTbody.innerHTML = html;
+      } else {
+        waitingContainer.style.display = "none";
+      }
+
+      // Render 근무지별 참여자 그룹
+      let availableWorksites = AppData.worksites.filter(w => w.year === CurrentYear);
+      if (CurrentProgram !== "ALL") {
+        availableWorksites = availableWorksites.filter(w => w.program === CurrentProgram);
+      }
+
+      if (availableWorksites.length === 0 && activeList.length === 0) {
+        worksiteContainer.innerHTML = `
+          <div class="worksite-group-card" style="text-align:center;padding:48px;">
+            <p style="font-size:16px;font-weight:700;color:#666;">등록된 근무지나 참여자가 없습니다.</p>
+            <button class="btn btn-primary" style="margin-top:16px;" onclick="openWorksiteModal()">
+              + 첫 근무지 등록하기
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      let groupsHtml = "";
+      availableWorksites.forEach(ws => {
+        // 이 근무지에 속한 참여자 목록
+        const wsParticipants = activeList.filter(p => p.worksiteId === ws.id);
+        const participatingCount = wsParticipants.filter(p => p.status === "참여").length;
+        const suspendedCount = wsParticipants.filter(p => p.status === "활동중지").length;
+        const totalAssigned = participatingCount + suspendedCount;
+        
+        // 정원 비교
+        const capacity = ws.capacity || 0;
+        const shortage = capacity - participatingCount;
+        let capBadgeClass = shortage > 0 ? "shortage" : "full";
+        let capText = shortage > 0 
+          ? `현재 참여 ${participatingCount}명 (중지 ${suspendedCount}명) / 정원 ${capacity}명 (부족 ${shortage}명)` 
+          : `참여 ${participatingCount}명 (중지 ${suspendedCount}명) / 정원 ${capacity}명 충족`;
+
+        // 연결 수요처 이름
+        const demand = AppData.demands.find(d => d.id === ws.demandId);
+        const demandName = demand ? demand.name : "수요처 미지정";
+
+        groupsHtml += `
+          <div class="worksite-group-card">
+            <div class="worksite-header">
+              <div class="worksite-title-area">
+                ${getProgramBadgeHtml(ws.program)}
+                <span class="worksite-name">${ws.name}</span>
+                <span class="capacity-badge ${capBadgeClass}">
+                  <i data-lucide="users" style="width:13px;height:13px;"></i> ${capText}
+                </span>
+                <span class="worksite-demand-link" title="연결 수요처">
+                  <i data-lucide="building" style="width:12px;height:12px;"></i> ${demandName}
+                </span>
+              </div>
+              <div style="display:flex;gap:6px;">
+                <button class="btn btn-sm btn-ghost" onclick="openWorksiteModal('${ws.id}')">근무지 설정</button>
+                <button class="btn btn-sm btn-primary" onclick="openParticipantModal('', '${ws.id}', '${ws.program}')">+ 참여자 배정</button>
+              </div>
+            </div>
+
+            <div class="participant-table-wrapper">
+              <table class="slush-table">
+                <thead>
+                  <tr>
+                    <th>이름</th>
+                    <th>생년월일</th>
+                    <th>상태</th>
+                    <th>활동 기간</th>
+                    <th>활동중지 현황</th>
+                    <th>특이사항</th>
+                    <th style="text-align:right;">업무 처리</th>
+                  </tr>
+                </thead>
+                <tbody>
+        `;
+
+        if (wsParticipants.length === 0) {
+          groupsHtml += `<tr><td colspan="7" style="text-align:center;color:#888;padding:24px;">이 근무지에 배정된 참여자가 없습니다. 참여자를 배정해주세요.</td></tr>`;
+        } else {
+          wsParticipants.forEach(p => {
+            const isOverdue = isSuspensionOverdue(p.id);
+            const susSummary = getParticipantSuspensionSummary(p.id, p.program);
+            
+            // 상태 배지
+            let statusBadge = "";
+            if (p.status === "참여") {
+              statusBadge = `<span class="badge badge-participating">● 참여 중</span>`;
+            } else if (p.status === "활동중지") {
+              statusBadge = `<span class="badge badge-suspended">⏸️ 활동중지</span>`;
+            }
+
+            // 미복귀 경고 라벨
+            let overdueAlert = "";
+            if (isOverdue) {
+              overdueAlert = `
+                <div style="margin-top:4px;">
+                  <span class="badge badge-alert">
+                    🚨 종료일 경과! 복귀 확인 필요
+                  </span>
+                </div>
+              `;
+            }
+
+            // 활동중지 게이지 바
+            const progressPercent = Math.min(100, Math.round((susSummary.totalDays / susSummary.maxLimit) * 100));
+            const isWarning = susSummary.isExceeded;
+
+            groupsHtml += `
+              <tr>
+                <td style="font-weight:800;font-size:14px;">
+                  ${p.name}
+                  ${overdueAlert}
+                </td>
+                <td>${p.birth}</td>
+                <td>${statusBadge}</td>
+                <td>
+                  <span style="font-size:12px;font-weight:600;">${p.startDate || '-'} ~ ${p.endDate || '2026-12-31'}</span>
+                </td>
+                <td>
+                  <div class="suspension-progress-box">
+                    <div style="display:flex;justify-content:space-between;gap:6px;">
+                      <span>${susSummary.count}회 (${susSummary.totalDays}일 사용)</span>
+                      <span style="color:#666;">잔여 ${susSummary.remainingDays}일</span>
+                    </div>
+                    <div class="progress-bar-track">
+                      <div class="progress-bar-fill ${isWarning ? 'warning' : ''}" style="width:${progressPercent}%;"></div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span style="font-size:12px;color:#444;" title="${p.notes || ''}">
+                    ${p.notes ? (p.notes.length > 25 ? p.notes.substring(0, 25) + '...' : p.notes) : '<span style="color:#aaa;">-</span>'}
+                  </span>
+                </td>
+                <td style="text-align:right;">
+                  <div class="action-button-group" style="justify-content:flex-end;">
+                    <button class="btn btn-sm btn-lavender" onclick="openSuspensionModal('${p.id}')" title="활동중지 일수 관리">
+                      <i data-lucide="clock" style="width:13px;height:13px;"></i> 활동중지
+                    </button>
+                    <button class="btn btn-sm btn-ghost" onclick="openStatusChangeModal('${p.id}')">
+                      상태 변경
+                    </button>
+                    <button class="btn btn-sm btn-ghost" onclick="openParticipantModal('${p.id}')">
+                      수정
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            `;
+          });
+        }
+
+        groupsHtml += `
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      });
+
+      worksiteContainer.innerHTML = groupsHtml;
+    }
+
+    // 4.4 근무지 탭 렌더링
+    function renderWorksitesTab() {
+      const container = document.getElementById("worksitesGridContainer");
+      let list = AppData.worksites.filter(w => w.year === CurrentYear);
+      if (CurrentProgram !== "ALL") {
+        list = list.filter(w => w.program === CurrentProgram);
+      }
+
+      if (list.length === 0) {
+        container.innerHTML = `<p style="grid-column:1/-1;text-align:center;padding:40px;color:#777;">등록된 근무지가 없습니다.</p>`;
+        return;
+      }
+
+      let html = "";
+      list.forEach(ws => {
+        const assigned = AppData.participants.filter(p => p.worksiteId === ws.id && p.status !== "중도포기");
+        const participatingCount = assigned.filter(p => p.status === "참여").length;
+        const suspendedCount = assigned.filter(p => p.status === "활동중지").length;
+        const shortage = ws.capacity - participatingCount;
+        const demand = AppData.demands.find(d => d.id === ws.demandId);
+
+        html += `
+          <div class="slush-card">
+            <div>
+              <div class="slush-card-header">
+                ${getProgramBadgeHtml(ws.program)}
+                <span class="badge ${shortage > 0 ? 'badge-waiting' : 'badge-participating'}">
+                  ${shortage > 0 ? `부족 ${shortage}명` : '충족'}
+                </span>
+              </div>
+              <div class="slush-card-title" style="margin-top:8px;">${ws.name}</div>
+            </div>
+
+            <div class="slush-card-body">
+              <div class="info-row">
+                <span class="info-label">목표 희망인원(T.O)</span>
+                <span class="info-val">${ws.capacity}명</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">현재 활동 참여</span>
+                <span class="info-val">${participatingCount}명</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">일시 활동중지</span>
+                <span class="info-val">${suspendedCount}명</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">연결 수요처</span>
+                <span class="info-val" style="font-size:12px;">${demand ? demand.name : '미지정'}</span>
+              </div>
+            </div>
+
+            <div style="display:flex;justify-content:flex-end;gap:6px;border-top:1px solid #eee;padding-top:12px;">
+              <button class="btn btn-sm btn-ghost" onclick="deleteWorksite('${ws.id}')">삭제</button>
+              <button class="btn btn-sm btn-primary" onclick="openWorksiteModal('${ws.id}')">설정 수정</button>
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    // 4.5 수요처 탭 렌더링
+    function renderDemandsTab() {
+      const container = document.getElementById("demandsGridContainer");
+      let list = AppData.demands.filter(d => d.year === CurrentYear);
+      if (CurrentProgram !== "ALL") {
+        list = list.filter(d => d.program === CurrentProgram || d.program === "공통");
+      }
+
+      if (list.length === 0) {
+        const progName = CurrentProgram === "ALL" ? "전체" : CurrentProgram;
+        container.innerHTML = `
+          <div style="grid-column:1/-1;text-align:center;padding:48px;background:var(--color-paper-white);border:1px solid var(--color-carbon);border-radius:var(--radius-cards);">
+            <p style="font-size:16px;font-weight:700;color:#666;">[${progName}] 사업단에 등록된 수요처가 없습니다.</p>
+            <button class="btn btn-primary btn-sm" style="margin-top:14px;" onclick="openDemandModal()">
+              + [${progName}] 새 수요처 등록하기
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      let html = "";
+      list.forEach(dm => {
+        // 연결된 근무지들
+        const linkedWorksites = AppData.worksites.filter(w => w.demandId === dm.id);
+        const wsNames = linkedWorksites.map(w => w.name).join(", ") || "연결 근무지 없음";
+
+        html += `
+          <div class="slush-card">
+            <div>
+              <div class="slush-card-header">
+                <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+                  ${getProgramBadgeHtml(dm.program)}
+                  <span class="badge" style="background:var(--color-sunburst);color:#000;">수요처</span>
+                </div>
+                <span style="font-size:12px;font-weight:700;color:#666;">휴무: ${dm.holiday || '없음'}</span>
+              </div>
+              <div class="slush-card-title" style="margin-top:8px;">${dm.name}</div>
+            </div>
+
+            <div class="slush-card-body">
+              <div class="info-row">
+                <span class="info-label">담당자명</span>
+                <span class="info-val">${dm.manager || '-'}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">연락처</span>
+                <span class="info-val">${dm.phone || '-'}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">관리 면적</span>
+                <span class="info-val">${dm.area || '-'}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">주소</span>
+                <span class="info-val" style="font-size:12px;" title="${dm.address || ''}">
+                  ${dm.address ? (dm.address.length > 18 ? dm.address.substring(0, 18) + '...' : dm.address) : '-'}
+                </span>
+              </div>
+              <div style="background:#f8f9fc;padding:8px;border-radius:8px;font-size:12px;margin-top:4px;">
+                <strong>연결 근무지:</strong> ${wsNames}
+              </div>
+            </div>
+
+            <div style="display:flex;justify-content:flex-end;gap:6px;border-top:1px solid #eee;padding-top:12px;">
+              <button class="btn btn-sm btn-ghost" onclick="deleteDemand('${dm.id}')">삭제</button>
+              <button class="btn btn-sm btn-primary" onclick="openDemandModal('${dm.id}')">상세/수정</button>
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    // 4.6 중도포기자 탭 렌더링
+    function renderDroppedTab() {
+      const tbody = document.getElementById("droppedTableBody");
+      let list = AppData.participants.filter(p => p.year === CurrentYear && p.status === "중도포기");
+      if (CurrentProgram !== "ALL") {
+        list = list.filter(p => p.program === CurrentProgram);
+      }
+      document.getElementById("droppedHeaderCount").innerText = `${list.length}명`;
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:30px;color:#888;">해당 연도에 중도포기한 참여자 기록이 없습니다.</td></tr>`;
+        return;
+      }
+
+      let html = "";
+      list.forEach(p => {
+        const ws = AppData.worksites.find(w => w.id === p.worksiteId);
+        html += `
+          <tr>
+            <td>${getProgramBadgeHtml(p.program)}</td>
+            <td style="font-weight:800;font-size:14px;">${p.name}</td>
+            <td>${p.birth}</td>
+            <td>${ws ? ws.name : '미배치'}</td>
+            <td>${p.startDate || '-'}</td>
+            <td style="color:var(--color-ember);font-weight:800;">${p.dropDate || '-'}</td>
+            <td style="font-weight:600;color:#c00;">${p.dropReason || '사유 미기재'}</td>
+            <td>${p.notes || '-'}</td>
+            <td style="text-align:right;">
+              <button class="btn btn-sm btn-ghost" onclick="openParticipantModal('${p.id}')">상세 기록 열람</button>
+            </td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html;
+    }
+
+    /* -------------------------------------------------------------------------
+       5. INTERACTIVE EVENTS & FILTER HANDLERS
+       ------------------------------------------------------------------------- */
+    function handleYearChange(year) {
+      CurrentYear = year;
+      renderAll();
+      showToast(`${year}년도 자료로 전환되었습니다.`);
+    }
+
+    function switchProgram(programName, btnElem) {
+      CurrentProgram = programName;
+      document.querySelectorAll(".program-pill").forEach(el => el.classList.remove("active"));
+      btnElem.classList.add("active");
+      renderAll();
+    }
+
+    function switchMainTab(tabId, btnElem) {
+      CurrentMainTab = tabId;
+      document.querySelectorAll(".tab-pill").forEach(el => el.classList.remove("active"));
+      btnElem.classList.add("active");
+
+      document.querySelectorAll(".tab-pane").forEach(pane => pane.classList.remove("active"));
+      document.getElementById(tabId).classList.add("active");
+
+      // 참여자 툴바 보임/숨김
+      const toolbar = document.getElementById("participantToolbar");
+      if (tabId === "participantsTab") {
+        toolbar.style.display = "flex";
+      } else {
+        toolbar.style.display = "none";
+      }
+      lucide.createIcons();
+    }
+
+    function handleParticipantSearch(query) {
+      CurrentSearchQuery = query;
+      renderParticipantTab();
+      lucide.createIcons();
+    }
+
+    function filterParticipantStatus(status, btnElem) {
+      CurrentStatusFilter = status;
+      document.querySelectorAll(".status-filter-btn").forEach(b => b.classList.remove("active"));
+      btnElem.classList.add("active");
+      renderParticipantTab();
+      lucide.createIcons();
+    }
+
+    /* -------------------------------------------------------------------------
+       6. MODAL HANDLERS & FORMS
+       ------------------------------------------------------------------------- */
+    function openModal(modalId) {
+      document.getElementById(modalId).classList.add("open");
+      lucide.createIcons();
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove("open");
+    }
+
+    // 6.1 참여자 등록/수정 모달
+    function openParticipantModal(id = "", preselectedWorksiteId = "", preselectedProgram = "") {
+      const form = document.getElementById("participantForm");
+      form.reset();
+      document.getElementById("pFormId").value = id;
+      document.getElementById("pFormYear").value = CurrentYear;
+
+      populateWorksiteSelectInForm("pFormWorksite", preselectedProgram || "공원환경개선");
+
+      if (id) {
+        document.getElementById("participantModalTitle").innerText = "참여자 정보 수정";
+        const p = AppData.participants.find(x => x.id === id);
+        if (p) {
+          document.getElementById("pFormYear").value = p.year;
+          document.getElementById("pFormProgram").value = p.program;
+          populateWorksiteSelectInForm("pFormWorksite", p.program);
+          document.getElementById("pFormName").value = p.name;
+          document.getElementById("pFormBirth").value = p.birth;
+          document.getElementById("pFormStatus").value = p.status;
+          document.getElementById("pFormWorksite").value = p.worksiteId || "";
+          document.getElementById("pFormStartDate").value = p.startDate || "";
+          document.getElementById("pFormEndDate").value = p.endDate || `${p.year}-12-31`;
+          document.getElementById("pFormDropDate").value = p.dropDate || "";
+          document.getElementById("pFormDropReason").value = p.dropReason || "";
+          document.getElementById("pFormNotes").value = p.notes || "";
+          onStatusChangeInForm(p.status);
+        }
+      } else {
+        document.getElementById("participantModalTitle").innerText = "신규 참여자 직접 등록";
+        if (preselectedProgram && preselectedProgram !== "ALL") {
+          document.getElementById("pFormProgram").value = preselectedProgram;
+          populateWorksiteSelectInForm("pFormWorksite", preselectedProgram);
+        }
+        if (preselectedWorksiteId) {
+          document.getElementById("pFormWorksite").value = preselectedWorksiteId;
+        }
+        document.getElementById("pFormStartDate").value = `${CurrentYear}-01-02`;
+        document.getElementById("pFormEndDate").value = `${CurrentYear}-12-31`;
+        onStatusChangeInForm("참여");
+      }
+
+      openModal("participantModal");
+    }
+
+    function populateWorksiteSelectInForm(selectId, program) {
+      const select = document.getElementById(selectId);
+      select.innerHTML = '<option value="">(근무지 미지정 / 대기)</option>';
+      const worksites = AppData.worksites.filter(w => w.year === CurrentYear && w.program === program);
+      worksites.forEach(ws => {
+        select.innerHTML += `<option value="${ws.id}">${ws.name} (정원 ${ws.capacity}명)</option>`;
+      });
+    }
+
+    function onProgramChangeInForm() {
+      const prog = document.getElementById("pFormProgram").value;
+      populateWorksiteSelectInForm("pFormWorksite", prog);
+    }
+
+    function onStatusChangeInForm(status) {
+      const dropRow = document.getElementById("pFormDropRow");
+      const dateRow = document.getElementById("pFormDateRow");
+      const wsGroup = document.getElementById("pFormWorksite");
+
+      if (status === "중도포기") {
+        dropRow.style.display = "block";
+        document.getElementById("pFormDropDate").required = true;
+        document.getElementById("pFormDropReason").required = true;
+      } else {
+        dropRow.style.display = "none";
+        document.getElementById("pFormDropDate").required = false;
+        document.getElementById("pFormDropReason").required = false;
+      }
+
+      if (status === "대기") {
+        wsGroup.required = false;
+      } else if (status === "참여") {
+        wsGroup.required = true;
+      }
+    }
+
+    function handleParticipantFormSubmit(e) {
+      e.preventDefault();
+      const id = document.getElementById("pFormId").value;
+      const year = document.getElementById("pFormYear").value;
+      const program = document.getElementById("pFormProgram").value;
+      const name = document.getElementById("pFormName").value.trim();
+      const birth = document.getElementById("pFormBirth").value;
+      const status = document.getElementById("pFormStatus").value;
+      const worksiteId = document.getElementById("pFormWorksite").value;
+      const startDate = document.getElementById("pFormStartDate").value;
+      const endDate = document.getElementById("pFormEndDate").value;
+      const dropDate = document.getElementById("pFormDropDate").value;
+      const dropReason = document.getElementById("pFormDropReason").value.trim();
+      const notes = document.getElementById("pFormNotes").value.trim();
+
+      // 유효성 체크: 참여 상태일 때 근무지와 시작일 필수
+      if (status === "참여" && (!worksiteId || !startDate)) {
+        alert("상태가 [참여]인 경우 배치 근무지와 활동 시작일을 반드시 지정해야 합니다.");
+        return;
+      }
+
+      if (id) {
+        // Update
+        const idx = AppData.participants.findIndex(x => x.id === id);
+        if (idx !== -1) {
+          AppData.participants[idx] = {
+            ...AppData.participants[idx],
+            year, program, name, birth, status, worksiteId, startDate, endDate, dropDate, dropReason, notes
+          };
+          showToast(`${name} 님의 정보가 수정되었습니다.`);
+        }
+      } else {
+        // Create
+        const newId = generateId("p");
+        AppData.participants.push({
+          id: newId,
+          year, program, name, birth, status, worksiteId, startDate, endDate, dropDate, dropReason, notes
+        });
+        showToast(`신규 참여자 [${name}] 님이 등록되었습니다.`);
+      }
+
+      saveData();
+      closeModal("participantModal");
+      renderAll();
+    }
+
+    // 6.2 상태 변경 전용 모달 (PRD 상태 전환 규칙 엄격 검증)
+    function openStatusChangeModal(participantId) {
+      const p = AppData.participants.find(x => x.id === participantId);
+      if (!p) return;
+
+      document.getElementById("statusChangePId").value = p.id;
+      document.getElementById("statusChangePName").innerText = `${p.name} (${p.program})`;
+      document.getElementById("statusChangePCurrent").innerText = `현재 상태: ${p.status} / 생년월일: ${p.birth}`;
+
+      const select = document.getElementById("statusChangeSelect");
+      select.innerHTML = "";
+
+      // 상태 전이 규칙 (PRD 5장 테이블)
+      if (p.status === "대기") {
+        select.innerHTML = `
+          <option value="참여" selected>참여 (근무지 배정 및 시작일 입력)</option>
+        `;
+      } else if (p.status === "참여") {
+        select.innerHTML = `
+          <option value="활동중지" selected>활동중지 (중지 기간 및 사유 등록)</option>
+          <option value="중도포기">중도포기 (포기일자 및 사유 입력)</option>
+        `;
+      } else if (p.status === "활동중지") {
+        select.innerHTML = `
+          <option value="참여" selected>참여 복귀 (실제 복귀 확인)</option>
+          <option value="중도포기">중도포기 (포기일자 및 사유 입력)</option>
+        `;
+      } else if (p.status === "중도포기") {
+        select.innerHTML = `
+          <option value="참여">참여로 재개</option>
+          <option value="대기">대기로 전환</option>
+        `;
+      }
+
+      // 근무지 셀렉트 구성
+      const wsSelect = document.getElementById("statusChangeWorksiteSelect");
+      wsSelect.innerHTML = "";
+      const worksites = AppData.worksites.filter(w => w.year === p.year && w.program === p.program);
+      worksites.forEach(w => {
+        wsSelect.innerHTML += `<option value="${w.id}">${w.name} (정원 ${w.capacity}명)</option>`;
+      });
+
+      document.getElementById("statusChangeStartDate").value = getTodayString();
+      document.getElementById("statusChangeReturnDate").value = getTodayString();
+      document.getElementById("statusChangeDropDate").value = getTodayString();
+      document.getElementById("statusChangeDropReason").value = "";
+
+      onStatusModalSelectChange(select.value);
+      openModal("statusChangeModal");
+    }
+
+    function onStatusModalSelectChange(targetStatus) {
+      const toParticipateBox = document.getElementById("statusChangeToParticipateFields");
+      const returnBox = document.getElementById("statusChangeReturnFields");
+      const dropBox = document.getElementById("statusChangeDropFields");
+
+      toParticipateBox.style.display = "none";
+      returnBox.style.display = "none";
+      dropBox.style.display = "none";
+
+      const pId = document.getElementById("statusChangePId").value;
+      const p = AppData.participants.find(x => x.id === pId);
+
+      if (targetStatus === "참여") {
+        if (p && p.status === "대기") {
+          toParticipateBox.style.display = "block";
+        } else if (p && p.status === "활동중지") {
+          returnBox.style.display = "block";
+        }
+      } else if (targetStatus === "중도포기") {
+        dropBox.style.display = "block";
+      }
+    }
+
+    function handleStatusChangeSubmit(e) {
+      e.preventDefault();
+      const pId = document.getElementById("statusChangePId").value;
+      const targetStatus = document.getElementById("statusChangeSelect").value;
+      const p = AppData.participants.find(x => x.id === pId);
+      if (!p) return;
+
+      if (targetStatus === "참여" && p.status === "대기") {
+        const wsId = document.getElementById("statusChangeWorksiteSelect").value;
+        const sDate = document.getElementById("statusChangeStartDate").value;
+        if (!wsId || !sDate) {
+          alert("대기자를 참여로 전환할 때에는 근무지와 활동 시작일을 반드시 입력해야 합니다.");
+          return;
+        }
+        p.worksiteId = wsId;
+        p.startDate = sDate;
+        p.status = "참여";
+        showToast(`${p.name} 님이 참여 상태로 전환 배정되었습니다.`);
+      } else if (targetStatus === "활동중지") {
+        p.status = "활동중지";
+        showToast(`${p.name} 님이 활동중지 상태로 변경되었습니다.`);
+        closeModal("statusChangeModal");
+        saveData();
+        renderAll();
+        // 중지 기간 입력 유도
+        openSuspensionModal(p.id);
+        return;
+      } else if (targetStatus === "참여" && p.status === "활동중지") {
+        const returnDate = document.getElementById("statusChangeReturnDate").value;
+        p.status = "참여";
+        
+        // 마지막 활동중지 건의 종료일 조정 (실제 복귀일 전날로 마감)
+        const suspList = AppData.suspensions.filter(s => s.participantId === p.id);
+        if (suspList.length > 0) {
+          suspList.sort((a, b) => new Date(b.endDate) - new Date(a.endDate));
+          const lastSus = suspList[0];
+          if (returnDate) {
+            const retD = new Date(returnDate);
+            retD.setDate(retD.getDate() - 1);
+            const adjustedEnd = retD.toISOString().split("T")[0];
+            if (adjustedEnd >= lastSus.startDate) {
+              lastSus.endDate = adjustedEnd;
+              lastSus.days = calculateInclusiveDays(lastSus.startDate, lastSus.endDate);
+            }
+          }
+        }
+        showToast(`${p.name} 님의 복귀가 확인되어 정상 참여로 전환되었습니다.`);
+      } else if (targetStatus === "중도포기") {
+        const dropDate = document.getElementById("statusChangeDropDate").value;
+        const dropReason = document.getElementById("statusChangeDropReason").value.trim();
+        if (!dropDate || !dropReason) {
+          alert("중도포기 일자와 사유를 반드시 입력해주세요.");
+          return;
+        }
+        p.status = "중도포기";
+        p.dropDate = dropDate;
+        p.dropReason = dropReason;
+        showToast(`${p.name} 님이 중도포기 처리되었으며, 과거 기록은 영구 보존됩니다.`);
+      }
+
+      saveData();
+      closeModal("statusChangeModal");
+      renderAll();
+    }
+
+    // 6.3 활동중지 다회 관리 모달
+    function openSuspensionModal(participantId) {
+      const p = AppData.participants.find(x => x.id === participantId);
+      if (!p) return;
+
+      document.getElementById("suspendParticipantId").value = p.id;
+      document.getElementById("suspendModalSubTitle").innerText = `참여자: ${p.name} (생년월일: ${p.birth} / 사업단: ${p.program})`;
+
+      const summary = getParticipantSuspensionSummary(p.id, p.program);
+      document.getElementById("suspendGaugeTitle").innerText = `연간 활동중지 한도: ${summary.maxLimit}일 (${p.program})`;
+      document.getElementById("suspendGaugeValues").innerText = `총 ${summary.count}회 / 사용 ${summary.totalDays}일 / 잔여 ${summary.remainingDays}일`;
+
+      const progressPercent = Math.min(100, Math.round((summary.totalDays / summary.maxLimit) * 100));
+      const fillBar = document.getElementById("suspendModalProgress");
+      fillBar.style.width = `${progressPercent}%`;
+      if (summary.isExceeded) {
+        fillBar.classList.add("warning");
+        document.getElementById("suspendWarningBanner").style.display = "block";
+      } else {
+        fillBar.classList.remove("warning");
+        document.getElementById("suspendWarningBanner").style.display = "none";
+      }
+
+      // 초기화
+      document.getElementById("newSuspensionForm").reset();
+      document.getElementById("calculatedDaysDisplay").innerText = "0 일간";
+      document.getElementById("overlapWarningBanner").style.display = "none";
+
+      renderSuspensionHistory(p.id);
+      openModal("suspensionModal");
+    }
+
+    function calculateNewSuspendDays() {
+      const start = document.getElementById("suspendStartDate").value;
+      const end = document.getElementById("suspendEndDate").value;
+      const pId = document.getElementById("suspendParticipantId").value;
+      const overlapBanner = document.getElementById("overlapWarningBanner");
+
+      if (start && end) {
+        if (start > end) {
+          document.getElementById("calculatedDaysDisplay").innerText = "오류 (시작일 > 종료일)";
+          overlapBanner.style.display = "none";
+          return;
+        }
+        const days = calculateInclusiveDays(start, end);
+        document.getElementById("calculatedDaysDisplay").innerText = `${days} 일간`;
+
+        // 기간 중복 검증 (PRD 4.3: 중복 일수 계산 방지)
+        const existing = AppData.suspensions.filter(s => s.participantId === pId);
+        const hasOverlap = existing.some(s => {
+          return (start <= s.endDate && end >= s.startDate);
+        });
+
+        if (hasOverlap) {
+          overlapBanner.style.display = "block";
+        } else {
+          overlapBanner.style.display = "none";
+        }
+      } else {
+        document.getElementById("calculatedDaysDisplay").innerText = "0 일간";
+        overlapBanner.style.display = "none";
+      }
+    }
+
+    function handleNewSuspensionSubmit(e) {
+      e.preventDefault();
+      const pId = document.getElementById("suspendParticipantId").value;
+      const start = document.getElementById("suspendStartDate").value;
+      const end = document.getElementById("suspendEndDate").value;
+      const reason = document.getElementById("suspendReason").value.trim();
+
+      if (!start || !end) {
+        alert("시작일과 종료 예정일을 입력해주세요.");
+        return;
+      }
+      if (start > end) {
+        alert("종료 예정일은 시작일보다 빠를 수 없습니다.");
+        return;
+      }
+
+      // 중복 체크
+      const existing = AppData.suspensions.filter(s => s.participantId === pId);
+      const hasOverlap = existing.some(s => (start <= s.endDate && end >= s.startDate));
+      if (hasOverlap) {
+        alert("입력한 기간이 기존 활동중지 기간과 겹칩니다. 날짜를 수정해주세요.");
+        return;
+      }
+
+      const days = calculateInclusiveDays(start, end);
+      const p = AppData.participants.find(x => x.id === pId);
+      const summary = getParticipantSuspensionSummary(pId, p.program);
+
+      // 한도 초과 경고
+      if (summary.totalDays + days > summary.maxLimit) {
+        if (!confirm(`이 건을 추가하면 총 사용일수가 ${summary.totalDays + days}일로 연간 한도(${summary.maxLimit}일)를 초과합니다.\n그래도 등록하시겠습니까?`)) {
+          return;
+        }
+      }
+
+      AppData.suspensions.push({
+        id: generateId("sus"),
+        participantId: pId,
+        startDate: start,
+        endDate: end,
+        days: days,
+        reason: reason
+      });
+
+      saveData();
+      showToast("활동중지 기간이 등록되었습니다.");
+      openSuspensionModal(pId);
+      renderAll();
+    }
+
+    function renderSuspensionHistory(participantId) {
+      const container = document.getElementById("suspensionHistoryList");
+      const list = AppData.suspensions.filter(s => s.participantId === participantId);
+      list.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+
+      if (list.length === 0) {
+        container.innerHTML = `<p style="text-align:center;padding:16px;color:#888;font-size:13px;">등록된 활동중지 내역이 없습니다.</p>`;
+        return;
+      }
+
+      let html = "";
+      list.forEach((s, idx) => {
+        html += `
+          <div class="suspension-item-card">
+            <div class="suspension-item-info">
+              <div style="font-weight:700;">
+                기간: ${s.startDate} ~ ${s.endDate} 
+                <span class="suspension-item-days">(${s.days}일간)</span>
+              </div>
+              <div style="font-size:12px;color:#555;">사유: ${s.reason || '사유 미작성'}</div>
+            </div>
+            <button class="btn btn-sm btn-ghost" onclick="deleteSuspension('${s.id}', '${participantId}')" style="color:var(--color-ember);">
+              삭제
+            </button>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function deleteSuspension(susId, pId) {
+      if (confirm("이 활동중지 기록을 삭제하시겠습니까?")) {
+        AppData.suspensions = AppData.suspensions.filter(s => s.id !== susId);
+        saveData();
+        showToast("활동중지 기록이 삭제되었습니다.");
+        openSuspensionModal(pId);
+        renderAll();
+      }
+    }
+
+    // 6.4 근무지 등록/수정 모달
+    function openWorksiteModal(id = "") {
+      const form = document.getElementById("worksiteForm");
+      form.reset();
+      document.getElementById("wsFormId").value = id;
+      document.getElementById("wsFormYear").value = CurrentYear;
+
+      // 수요처 옵션
+      const demandSelect = document.getElementById("wsFormDemand");
+      demandSelect.innerHTML = '<option value="">(연결 수요처 없음)</option>';
+      AppData.demands.filter(d => d.year === CurrentYear).forEach(d => {
+        demandSelect.innerHTML += `<option value="${d.id}">[${d.program || '공통'}] ${d.name}</option>`;
+      });
+
+      if (id) {
+        document.getElementById("worksiteModalTitle").innerText = "근무지 정보 수정";
+        const ws = AppData.worksites.find(x => x.id === id);
+        if (ws) {
+          document.getElementById("wsFormYear").value = ws.year;
+          document.getElementById("wsFormProgram").value = ws.program;
+          document.getElementById("wsFormName").value = ws.name;
+          document.getElementById("wsFormCapacity").value = ws.capacity;
+          document.getElementById("wsFormDemand").value = ws.demandId || "";
+        }
+      } else {
+        document.getElementById("worksiteModalTitle").innerText = "새 근무지 등록";
+        if (CurrentProgram !== "ALL") {
+          document.getElementById("wsFormProgram").value = CurrentProgram;
+        }
+      }
+      openModal("worksiteModal");
+    }
+
+    function handleWorksiteFormSubmit(e) {
+      e.preventDefault();
+      const id = document.getElementById("wsFormId").value;
+      const year = document.getElementById("wsFormYear").value;
+      const program = document.getElementById("wsFormProgram").value;
+      const name = document.getElementById("wsFormName").value.trim();
+      const capacity = parseInt(document.getElementById("wsFormCapacity").value, 10) || 1;
+      const demandId = document.getElementById("wsFormDemand").value;
+
+      if (id) {
+        const idx = AppData.worksites.findIndex(x => x.id === id);
+        if (idx !== -1) {
+          AppData.worksites[idx] = { ...AppData.worksites[idx], year, program, name, capacity, demandId };
+          showToast(`근무지 [${name}] 설정이 수정되었습니다.`);
+        }
+      } else {
+        AppData.worksites.push({
+          id: generateId("ws"),
+          year, program, name, capacity, demandId
+        });
+        showToast(`새 근무지 [${name}] 등록이 완료되었습니다.`);
+      }
+
+      saveData();
+      closeModal("worksiteModal");
+      renderAll();
+    }
+
+    function deleteWorksite(id) {
+      const assigned = AppData.participants.filter(p => p.worksiteId === id);
+      if (assigned.length > 0) {
+        alert(`이 근무지에 배정된 참여자가 ${assigned.length}명 있습니다. 참여자 근무지를 먼저 변경해주세요.`);
+        return;
+      }
+      if (confirm("이 근무지를 삭제하시겠습니까?")) {
+        AppData.worksites = AppData.worksites.filter(w => w.id !== id);
+        saveData();
+        showToast("근무지가 삭제되었습니다.");
+        renderAll();
+      }
+    }
+
+    // 6.5 수요처 등록/수정 모달
+    function openDemandModal(id = "") {
+      const form = document.getElementById("demandForm");
+      form.reset();
+      document.getElementById("dmFormId").value = id;
+      document.getElementById("dmFormYear").value = CurrentYear;
+
+      if (id) {
+        document.getElementById("demandModalTitle").innerText = "수요처 정보 수정";
+        const dm = AppData.demands.find(x => x.id === id);
+        if (dm) {
+          document.getElementById("dmFormYear").value = dm.year;
+          document.getElementById("dmFormProgram").value = dm.program || "공원환경개선";
+          document.getElementById("dmFormName").value = dm.name;
+          document.getElementById("dmFormArea").value = dm.area || "";
+          document.getElementById("dmFormAddress").value = dm.address || "";
+          document.getElementById("dmFormManager").value = dm.manager || "";
+          document.getElementById("dmFormHoliday").value = dm.holiday || "";
+          document.getElementById("dmFormPhone").value = dm.phone || "";
+          document.getElementById("dmFormEmail").value = dm.email || "";
+          document.getElementById("dmFormNotes").value = dm.notes || "";
+        }
+      } else {
+        document.getElementById("demandModalTitle").innerText = "새 수요처 등록";
+        if (CurrentProgram !== "ALL") {
+          document.getElementById("dmFormProgram").value = CurrentProgram;
+        } else {
+          document.getElementById("dmFormProgram").value = "공원환경개선";
+        }
+      }
+      openModal("demandModal");
+    }
+
+    function handleDemandFormSubmit(e) {
+      e.preventDefault();
+      const id = document.getElementById("dmFormId").value;
+      const year = document.getElementById("dmFormYear").value;
+      const program = document.getElementById("dmFormProgram").value;
+      const name = document.getElementById("dmFormName").value.trim();
+      const area = document.getElementById("dmFormArea").value.trim();
+      const address = document.getElementById("dmFormAddress").value.trim();
+      const manager = document.getElementById("dmFormManager").value.trim();
+      const holiday = document.getElementById("dmFormHoliday").value.trim();
+      const phone = document.getElementById("dmFormPhone").value.trim();
+      const email = document.getElementById("dmFormEmail").value.trim();
+      const notes = document.getElementById("dmFormNotes").value.trim();
+
+      if (id) {
+        const idx = AppData.demands.findIndex(x => x.id === id);
+        if (idx !== -1) {
+          AppData.demands[idx] = { ...AppData.demands[idx], year, program, name, area, address, manager, holiday, phone, email, notes };
+          showToast(`수요처 [${name}] 정보가 수정되었습니다.`);
+        }
+      } else {
+        AppData.demands.push({
+          id: generateId("dm"),
+          year, program, name, area, address, manager, holiday, phone, email, notes
+        });
+        showToast(`새 수요처 [${name}] 등록이 완료되었습니다.`);
+      }
+
+      saveData();
+      closeModal("demandModal");
+      renderAll();
+    }
+
+    function deleteDemand(id) {
+      const linked = AppData.worksites.filter(w => w.demandId === id);
+      if (linked.length > 0) {
+        if (!confirm(`이 수요처와 연결된 근무지가 ${linked.length}곳 있습니다. 그래도 삭제하시겠습니까?`)) {
+          return;
+        }
+      } else {
+        if (!confirm("이 수요처 정보를 삭제하시겠습니까?")) return;
+      }
+      AppData.demands = AppData.demands.filter(d => d.id !== id);
+      // 링크 해제
+      AppData.worksites.forEach(w => {
+        if (w.demandId === id) w.demandId = "";
+      });
+      saveData();
+      showToast("수요처가 삭제되었습니다.");
+      renderAll();
+    }
+
+    /* -------------------------------------------------------------------------
+       7. EXCEL (.XLSX) IMPORT MODULE (PRD 4.6 준수)
+       ------------------------------------------------------------------------- */
+    function setupDragAndDrop() {
+      const dropZone = document.getElementById("excelDropZone");
+      if (!dropZone) return;
+
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+      });
+      function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
+      });
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
+      });
+
+      dropZone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        handleExcelFileSelect(files);
+      });
+    }
+
+    function handleExcelFileSelect(files) {
+      if (!files || files.length === 0) return;
+      const file = files[0];
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          const jsonRows = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+
+          if (!jsonRows || jsonRows.length === 0) {
+            alert("엑셀 파일에 데이터가 비어있습니다.");
+            return;
+          }
+
+          processExcelRows(jsonRows);
+        } catch (err) {
+          console.error("Excel parse error:", err);
+          alert("엑셀 파일을 읽는 도중 오류가 발생했습니다: " + err.message);
+        }
+      };
+
+      reader.readAsArrayBuffer(file);
+    }
+
+    // 엑셀 열 매핑 및 데이터 유효성 검사 (주민번호 제외, 중복 후보 감지)
+    function processExcelRows(rows) {
+      ExcelParsedCandidates = [];
+      let validCount = 0;
+      let errorCount = 0;
+      let dupCount = 0;
+
+      rows.forEach((row, idx) => {
+        // 유연한 열 이름 매핑
+        const name = (row["이름"] || row["성명"] || row["참여자명"] || "").toString().trim();
+        let birth = (row["생년월일"] || row["생일"] || "").toString().trim();
+        let program = (row["사업단"] || row["사업단명"] || row["사업구분"] || "공원환경개선").toString().trim();
+        let status = (row["상태"] || row["참여상태"] || "참여").toString().trim();
+        const worksiteName = (row["근무지"] || row["배치근무지"] || row["근무장소"] || "").toString().trim();
+        let startDate = (row["시작일"] || row["활동시작일"] || row["배치일"] || "").toString().trim();
+        const notes = (row["비고"] || row["특이사항"] || row["메모"] || "").toString().trim();
+
+        // 날짜 정규화 (YYYY-MM-DD)
+        birth = normalizeDateString(birth);
+        startDate = normalizeDateString(startDate);
+
+        // 사업단 약칭 정규화
+        if (program.includes("맞돌") || program.includes("맞춤돌봄")) {
+          program = "맞춤돌봄서비스 지원";
+        } else if (program.includes("공원")) {
+          program = "공원환경개선";
+        } else if (program.includes("지역사회") || program.includes("환경개선")) {
+          program = "지역사회환경개선";
+        }
+
+        // 유효성 검사
+        let isValid = true;
+        let errorMessage = "";
+        let isDuplicate = false;
+
+        if (!name) {
+          isValid = false;
+          errorMessage = "이름 누락; ";
+        }
+        if (!birth) {
+          isValid = false;
+          errorMessage += "생년월일 누락/형식오류; ";
+        }
+
+        // 중복 후보 감지: 같은 연도, 같은 사업단의 이름+생년월일
+        const exists = AppData.participants.some(p => p.year === CurrentYear && p.program === program && p.name === name && p.birth === birth);
+        if (exists) {
+          isDuplicate = true;
+          dupCount++;
+        }
+
+        if (isValid) validCount++;
+        else errorCount++;
+
+        ExcelParsedCandidates.push({
+          rowIdx: idx + 1,
+          name, birth, program, status, worksiteName, startDate, notes,
+          isValid, errorMessage, isDuplicate
+        });
+      });
+
+      renderExcelPreview(validCount, errorCount, dupCount);
+    }
+
+    function normalizeDateString(str) {
+      if (!str) return "";
+      str = str.replace(/[./\s]/g, "-");
+      // 8자리 숫자 형태 (19500101 -> 1950-01-01)
+      if (/^\d{8}$/.test(str)) {
+        return `${str.substr(0, 4)}-${str.substr(4, 2)}-${str.substr(6, 2)}`;
+      }
+      return str;
+    }
+
+    function renderExcelPreview(validCount, errorCount, dupCount) {
+      document.getElementById("excelPreviewSection").style.display = "block";
+      document.getElementById("excelPreviewSummary").innerText = `미리보기: 총 ${ExcelParsedCandidates.length}건`;
+
+      const badgesArea = document.getElementById("excelValidationBadges");
+      badgesArea.innerHTML = `
+        <span class="badge badge-participating">정상 ${validCount}건</span>
+        ${dupCount > 0 ? `<span class="badge badge-waiting">기존 중복후보 ${dupCount}건</span>` : ''}
+        ${errorCount > 0 ? `<span class="badge badge-alert">오류 ${errorCount}건 (제외됨)</span>` : ''}
+      `;
+
+      const tbody = document.getElementById("excelPreviewTableBody");
+      let html = "";
+      ExcelParsedCandidates.forEach(item => {
+        let statusBadge = "";
+        if (!item.isValid) {
+          statusBadge = `<span class="badge badge-alert">오류</span>`;
+        } else if (item.isDuplicate) {
+          statusBadge = `<span class="badge badge-waiting">중복주의</span>`;
+        } else {
+          statusBadge = `<span class="badge badge-participating">정상</span>`;
+        }
+
+        html += `
+          <tr style="${!item.isValid ? 'background:#fff0f0;' : (item.isDuplicate ? 'background:#fffbf0;' : '')}">
+            <td>${statusBadge}</td>
+            <td style="font-weight:700;">${item.name || '<span style="color:red;">누락</span>'}</td>
+            <td>${item.birth || '<span style="color:red;">누락</span>'}</td>
+            <td>${item.program}</td>
+            <td>${item.status}</td>
+            <td>${item.worksiteName || '-'}</td>
+            <td>${item.startDate || '-'}</td>
+            <td style="font-size:12px;color:${item.isValid ? '#555' : 'red'};">
+              ${item.errorMessage || (item.isDuplicate ? '동일인 기존 등록됨 (추가 시 새 기록)' : '정상')}
+            </td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html;
+    }
+
+    function executeExcelImport() {
+      const validItems = ExcelParsedCandidates.filter(x => x.isValid);
+      if (validItems.length === 0) {
+        alert("가져올 수 있는 정상 데이터가 없습니다.");
+        return;
+      }
+
+      let importedCount = 0;
+      validItems.forEach(item => {
+        // 근무지 자동 매칭 (이름이 일치하는 근무지가 있으면 ID 연결, 없으면 대기로 처리하거나 자동 생성)
+        let matchedWs = AppData.worksites.find(w => w.year === CurrentYear && w.program === item.program && w.name.includes(item.worksiteName));
+        let wsId = matchedWs ? matchedWs.id : "";
+        let finalStatus = item.status;
+        if (!wsId && finalStatus === "참여") {
+          // 근무지가 없으면 대기 상태로 안전하게 전환
+          finalStatus = "대기";
+        }
+
+        AppData.participants.push({
+          id: generateId("p"),
+          year: CurrentYear,
+          program: item.program,
+          name: item.name,
+          birth: item.birth,
+          status: finalStatus,
+          worksiteId: wsId,
+          startDate: item.startDate || (finalStatus === "참여" ? `${CurrentYear}-01-02` : ""),
+          endDate: `${CurrentYear}-12-31`,
+          dropDate: "",
+          dropReason: "",
+          notes: item.notes ? `[엑셀가져오기] ${item.notes}` : "[엑셀일괄가져오기]"
+        });
+        importedCount++;
+      });
+
+      saveData();
+      closeModal("excelModal");
+      renderAll();
+      showToast(`성공적으로 ${importedCount}명의 참여자 데이터를 가져왔습니다!`);
+    }
+
+    function downloadSampleExcel() {
+      const sampleData = [
+        { "이름": "김철수", "생년월일": "1950-05-15", "사업단": "공원환경개선", "상태": "참여", "근무지": "탑골공원 1구역 (정문~사리탑)", "시작일": "2026-01-02", "비고": "성실 참여자" },
+        { "이름": "이영희", "생년월일": "1952-10-20", "사업단": "지역사회환경개선", "상태": "참여", "근무지": "혜화동 대학로 거리환경정비", "시작일": "2026-01-02", "비고": "오전 시간 희망" },
+        { "이름": "박만복", "생년월일": "1949-03-08", "사업단": "맞춤돌봄서비스 지원", "상태": "대기", "근무지": "", "시작일": "", "비고": "차기 결원 시 배정 대기" }
+      ];
+
+      const ws = XLSX.utils.json_to_sheet(sampleData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "참여자양식");
+      XLSX.writeFile(wb, "노인일자리_참여자_가져오기_샘플서식.xlsx");
+    }
+
+    /* -------------------------------------------------------------------------
+       8. BACKUP & RESTORE MODULE (JSON)
+       ------------------------------------------------------------------------- */
+    function exportDataToJson() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(AppData, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `노인일자리_참여자데이터_${CurrentYear}년_${getTodayString()}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      showToast("전체 데이터 백업 파일이 다운로드되었습니다.");
+    }
+
+    function importDataFromJson(files) {
+      if (!files || files.length === 0) return;
+      const file = files[0];
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (!imported.participants || !imported.worksites) {
+            throw new Error("올바른 백업 데이터 형식이 아닙니다.");
+          }
+          if (confirm("백업 파일을 가져오면 현재 저장된 데이터가 이 파일의 내용으로 완전히 대체됩니다. 계속하시겠습니까?")) {
+            AppData = imported;
+            saveData();
+            renderAll();
+            closeModal("backupModal");
+            showToast("백업 데이터가 성공적으로 복원되었습니다!");
+          }
+        } catch (err) {
+          alert("파일 복원 실패: " + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    /* -------------------------------------------------------------------------
+       9. NOTIFICATION TOAST
+       ------------------------------------------------------------------------- */
+    function showToast(message) {
+      const container = document.getElementById("toastContainer");
+      const toast = document.createElement("div");
+      toast.className = "toast";
+      toast.innerHTML = `<i data-lucide="check-circle" style="width:18px;height:18px;color:var(--color-mint-pop);"></i> <span>${message}</span>`;
+      container.appendChild(toast);
+      lucide.createIcons();
+
+      setTimeout(() => {
+        toast.style.opacity = "0";
+        toast.style.transition = "opacity 0.3s ease";
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+  </script>
+</body>
+</html>
